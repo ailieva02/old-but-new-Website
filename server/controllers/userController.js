@@ -13,88 +13,63 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-const getUser = (req, res) => {
-    const response = new ResponseModel();
-
+const getUser = async (req, res) => {
     const userId = parseInt(req.params.id);
-    const result = userService.getUserById(userId);
+    const result = await userService.getUserById(userId);
     
     if (result) {
-        response.success = true;
-        response.data = result;
-        res.status(200).json(response);
+        res.status(result.status).json(result);
     } else {
-        response.success = false;
-        response.message = 'User not found!';
-        res.status(404).json(response);
+        res.status(500).json("Something went wrong");    
     }
 };
 
-const createUser = (req, res) => {
-    const response = new ResponseModel();
+const createUser = async (req, res) => {
     const newUser = new UserModel();
 
-    newUser.name = req.params.name;
-    newUser.lastname = req.params.lastname;
-    newUser.username = req.params.username;
-    newUser.email = req.params.email;
-    newUser.password = req.params.password;
-    newUser.role = req.params.role;
+    newUser.name = req.body.name;
+    newUser.lastname = req.body.lastname;
+    newUser.username = req.body.username;
+    newUser.email = req.body.email;
+    newUser.password = req.body.password;
+    newUser.role = req.body.role;
     
-    const result = userService.createUser(newUser);
+    const result = await userService.createUser(newUser);
     if (result) {
-        response.success = true;
-        response.message = 'Successfully created user!';
-        res.status(200).json(response);
+        res.status(result.status).json(result);
     } else {
-        res.status(404).json({ success: false, message: 'Something went wrong, could not create user!' });
+        res.status(500).json("Something went wrong");    
     }
 };
 
-const updateUser = (req, res) => {
-    const response = new ResponseModel();
+const updateUser = async (req, res) => {
+    const userId = parseInt(req.body.id);
+    const userToUpdate = await userService.getUserById(userId);
 
-    const userId = parseInt(req.params.id);
-    const user = userService.getUserById(userId);
-
-    if (user) {
-        user.name = req.params.name;
-        user.lastname = req.params.lastname;
-        user.username = req.params.username;
-        user.email = req.params.email;
-        user.password = req.params.password;
-        user.role = req.params.role;
-
-        const result = userService.updateUser(user);
-        if (result) {
-            response.success = true;
-            response.message = 'Successfully updated user!';
-            res.status(200).json(response);
-        } else {
-            response.success = false;
-            response.message = 'Something went wrong, could not update user!';
-            res.status(500).json(response);
-        }
+    userToUpdate.id = userId;
+    userToUpdate.name = req.body.name;
+    userToUpdate.lastname = req.body.lastname;
+    userToUpdate.username = req.body.username;
+    userToUpdate.email = req.body.email;
+    userToUpdate.password = req.body.password;
+    userToUpdate.role = req.body.role;
+    
+    const result = await userService.updateUser(userToUpdate);
+    if (result) {
+        res.status(result.status).json(result);
     } else {
-        response.success = false;
-        response.message = 'Could not find user!';
-        res.status(404).json(response);
+        res.status(500).json("Something went wrong");    
     }
 }
 
-const deleteUser = (req, res) => {
-    const response = new ResponseModel();
-    const userId = parseInt(req.params.id);
-    const result = userService.deleteUserById(userId);
+const deleteUser = async (req, res) => {
+    const userId = parseInt(req.body.id);
+    const result = await userService.deleteUserById(userId);
 
     if (result) {
-        response.success = true;
-        response.message = 'User successfully deleted!';
-        res.status(200).json(response);
+        res.status(result.status).json(result);
     } else {
-        response.success = false;
-        response.message = 'Something went wrong, could not delete user or user does not exist!';
-        res.status(500).json(response);
+        res.status(500).json("Something went wrong");    
     }
 }
 
