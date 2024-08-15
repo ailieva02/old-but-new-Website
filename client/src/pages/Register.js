@@ -20,11 +20,32 @@ function Register() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  const validateForm = () => {
+    if (
+      !formData.name ||
+      !formData.lastname ||
+      !formData.username ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.email ||
+      !formData.role
+    ) {
+      return "All fields are required.";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return "Passwords do not match.";
+    }
+
+    return "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -79,6 +100,7 @@ function Register() {
             value={formData.name}
             onChange={handleChange}
             className="form-input"
+            required
           />
         </label>
         <br />
@@ -90,6 +112,7 @@ function Register() {
             value={formData.lastname}
             onChange={handleChange}
             className="form-input"
+            required
           />
         </label>
         <br />
@@ -101,6 +124,7 @@ function Register() {
             value={formData.username}
             onChange={handleChange}
             className="form-input"
+            required
           />
         </label>
         <br />
@@ -112,6 +136,7 @@ function Register() {
             value={formData.password}
             onChange={handleChange}
             className="form-input"
+            required
           />
         </label>
         <br />
@@ -123,6 +148,7 @@ function Register() {
             value={formData.confirmPassword}
             onChange={handleChange}
             className="form-input"
+            required
           />
         </label>
         <br />
@@ -134,6 +160,7 @@ function Register() {
             value={formData.email}
             onChange={handleChange}
             className="form-input"
+            required
           />
         </label>
         <br />
@@ -144,6 +171,7 @@ function Register() {
             value={formData.role}
             onChange={handleChange}
             className="form-select"
+            required
           >
             <option value="">Select Role</option>
             <option value="user">User</option>
@@ -153,7 +181,7 @@ function Register() {
         <br />
         {error && <p className="error-message">{error}</p>}
         {success && <p className="success-message">{success}</p>}
-        <button type="button" onClick={handleSubmit} className="submit-button">
+        <button type="submit" className="submit-button">
           Register
         </button>
       </form>

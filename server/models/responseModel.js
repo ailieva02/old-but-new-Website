@@ -4,7 +4,9 @@ class ResponseModel {
     message;
     data;
 
-    constructor () {}
+    constructor () {
+        this.status = 500;
+    }
 }
 
 module.exports = ResponseModel

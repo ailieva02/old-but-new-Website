@@ -1,0 +1,14 @@
+.home-container {
+  padding: 20px;
+}
+
+.post-container {
+  display: flex;
+  overflow-x: auto; /* Enables horizontal scrolling */
+  padding: 10px 0;
+  gap: 10px; /* Space between cards */
+}
+
+.post-container::-webkit-scrollbar {
+  display: none; /* Hides the scrollbar for a cleaner look */
+}
