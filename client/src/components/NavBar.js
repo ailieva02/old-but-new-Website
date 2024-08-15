@@ -1,10 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "../styles/NavBar.css";
 
 function NavBar() {
   return (
-    <nav>
-      <ul>
+    <nav className="navbar">
+      <img
+        src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjl1MHcxM25jZXl3aWhkcnhyaWJoNHBnZzl0OXFqMnZia2hwZXY0biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l49JZ1oF2qHawdmzm/giphy.webp"
+        alt="Logo"
+        className="logo"
+      />
+      <ul className="nav-links">
         <li>
           <Link to="/">Home</Link>
         </li>

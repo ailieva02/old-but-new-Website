@@ -1,10 +1,11 @@
 import React from "react";
+import "../styles/Login.css";
 
 function Login() {
   return (
-    <div>
+    <div className="login-container">
       <h1>Login Page</h1>
-      <form>
+      <form className="login-form">
         <label>
           Email:
           <input type="email" name="email" />

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles/Register.css";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -67,81 +68,92 @@ function Register() {
   };
 
   return (
-    <div>
+    <div className="register-container">
       <h1>Register Page</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
+      <form onSubmit={handleSubmit} className="register-form">
+        <label className="form-label">
           Name:
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
+            className="form-input"
           />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Last Name:
           <input
             type="text"
             name="lastname"
             value={formData.lastname}
             onChange={handleChange}
+            className="form-input"
           />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Username:
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
+            className="form-input"
           />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Password:
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
+            className="form-input"
           />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Confirm Password:
           <input
             type="password"
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
+            className="form-input"
           />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Email:
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
+            className="form-input"
           />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Role:
-          <select name="role" value={formData.role} onChange={handleChange}>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="form-select"
+          >
             <option value="">Select Role</option>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </label>
         <br />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
-        <button type="button" onClick={handleSubmit}>
+        {error && <p className="error-message">{error}</p>}
+        {success && <p className="success-message">{success}</p>}
+        <button type="button" onClick={handleSubmit} className="submit-button">
           Register
         </button>
       </form>
