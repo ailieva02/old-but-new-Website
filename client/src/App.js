@@ -1,95 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home.js";
+import Login from "./pages/Login.js";
+import Register from "./pages/Register.js";
+import UserAccount from "./pages/UserAccount.js";
+import SinglePost from "./pages/SinglePost.js";
+import AddEditPost from "./pages/AddEditPost.js";
+import Categories from "./pages/Categories";
+import AllUsers from "./pages/AllUsers";
+import NavBar from "./components/NavBar.js";
 
 function App() {
-  const [usersResponse, setUsersResponse] = useState(null);
-  const [singleUserResponse, setSingleUserResponse] = useState(null);
-
-  useEffect(() => {
-    fetch("http://localhost:5000/api/users")
-      .then((response) => response.json())
-      .then((usersResponse) => setUsersResponse(usersResponse))
-      .catch((error) => console.error("Error fetching users:", error));
-
-    fetch("http://localhost:5000/api/users/1")
-      .then((response) => response.json())
-      .then((singleUserResponse) => {
-        if (
-          singleUserResponse &&
-          singleUserResponse.data &&
-          singleUserResponse.data.length > 0
-        ) {
-          setSingleUserResponse(singleUserResponse.data[0]);
-        }
-      })
-      .catch((error) => console.error("Error fetching user:", error));
-  }, []);
-
   return (
-    <div className="App" style={{ padding: 20 }}>
-      <h1>Data from API:</h1>
-
-      <div
-        style={{
-          padding: "0 0 0 10px",
-          border: "3px solid black",
-          float: "left",
-          width: "40vw",
-        }}
-      >
-        <h2>All Users</h2>
-        {usersResponse ? (
-          <ul>
-            {usersResponse.data.map((user, i) => (
-              <li key={i}>
-                <p>
-                  Name: <b> {user.name} </b>
-                </p>
-                <p>
-                  Last Name: <b> {user.lastname} </b>
-                </p>
-                <p>
-                  Username: <b> {user.username} </b>
-                </p>
-                <p>
-                  Role: <b> {user.role} </b>
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Loading...</p>
-        )}
+    <Router>
+      <div className="App" style={{ padding: 20 }}>
+        <NavBar /> {}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/user-account" element={<UserAccount />} />
+          <Route path="/post/:id" element={<SinglePost />} />
+          <Route path="/add-edit-post" element={<AddEditPost />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/all-users" element={<AllUsers />} />
+        </Routes>
       </div>
-
-      <div
-        style={{
-          padding: "0 0 0 10px",
-          border: "3px solid black",
-          float: "right",
-          width: "40vw",
-        }}
-      >
-        <h2>Single User</h2>
-        {singleUserResponse ? (
-          <div>
-            <p>
-              Name: <b> {singleUserResponse.name} </b>
-            </p>
-            <p>
-              Last Name: <b> {singleUserResponse.lastname} </b>
-            </p>
-            <p>
-              Username: <b> {singleUserResponse.username} </b>
-            </p>
-            <p>
-              Role: <b> {singleUserResponse.role} </b>
-            </p>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
-      </div>
-    </div>
+    </Router>
   );
 }
 
