@@ -67,8 +67,8 @@ const createUser = (UserModel) => {
         UserModel.name,
         UserModel.lastname,
         UserModel.username,
-        UserModel.email,
         UserModel.password,
+        UserModel.email,
         UserModel.role,
       ],
       (error, results) => {

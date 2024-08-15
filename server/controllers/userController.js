@@ -31,8 +31,8 @@ const createUser = async (req, res) => {
   newUser.name = req.body.name;
   newUser.lastname = req.body.lastname;
   newUser.username = req.body.username;
-  newUser.email = req.body.email;
   newUser.password = req.body.password;
+  newUser.email = req.body.email;
   newUser.role = req.body.role;
 
   const result = await userService.createUser(newUser);

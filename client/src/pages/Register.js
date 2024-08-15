@@ -39,14 +39,13 @@ function Register() {
           name: formData.name,
           lastname: formData.lastname,
           username: formData.username,
-          email: formData.email,
           password: formData.password,
+          email: formData.email,
           role: formData.role,
         }),
       });
 
       if (response.ok) {
-        const result = await response.json();
         setSuccess("Registration successful!");
         setFormData({
           name: "",
