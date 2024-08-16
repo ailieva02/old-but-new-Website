@@ -1,14 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/PostCard.css";
 
-function PostCard({ title, body, image }) {
+function PostCard({ id, title, body, image }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/post/${id}`);
+  };
+
   return (
-    <div className="post-card">
-      <img
-        src={`./src/assets/images/${image}`}
-        alt={title}
-        className="post-image"
-      />
+    <div className="post-card" onClick={handleClick}>
+      <img src={image} alt={title} className="post-image" />
       <h2>{title}</h2>
       <p>{body}</p>
     </div>

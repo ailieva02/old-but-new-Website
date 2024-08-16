@@ -8,6 +8,7 @@ import SinglePost from "./pages/SinglePost.js";
 import AddEditPost from "./pages/AddEditPost.js";
 import Categories from "./pages/Categories";
 import AllUsers from "./pages/AllUsers";
+import SingleCategory from "./pages/SingleCategory.js";
 import NavBar from "./components/NavBar.js";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/add-edit-post" element={<AddEditPost />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/all-users" element={<AllUsers />} />
+          <Route path="/category/:id" element={<SingleCategory />} />
         </Routes>
       </div>
     </Router>

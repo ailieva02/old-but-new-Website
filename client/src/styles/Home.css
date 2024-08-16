@@ -2,13 +2,41 @@
   padding: 20px;
 }
 
+.category-section {
+  margin-bottom: 30px;
+}
+
+.category-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #000;
+}
+
 .post-container {
   display: flex;
-  overflow-x: auto; /* Enables horizontal scrolling */
+  overflow-x: auto;
   padding: 10px 0;
-  gap: 10px; /* Space between cards */
+  gap: 10px;
+  border-radius: 8px;
+  background-color: #e0f4f1;
+  border: 1px solid #b0d3c1;
 }
 
 .post-container::-webkit-scrollbar {
-  display: none; /* Hides the scrollbar for a cleaner look */
+  display: none;
+}
+
+.post-card {
+  flex: 0 0 auto;
+  width: 200px;
+  border: 1px solid #a0c4b3;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #d0f0c0;
+  transition: transform 0.2s;
+}
+
+.post-card:hover {
+  transform: scale(1.05);
 }
