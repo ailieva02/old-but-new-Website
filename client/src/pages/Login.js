@@ -1,40 +1,13 @@
 import React, { useState } from "react";
 import "../styles/Login.css";
-
-const handleLogin = async (userEmail, userPassword) => {
-  const response = await fetch("http://localhost:5000/api/users/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email: userEmail, password: userPassword }),
-  });
-
-  const result = await response.json();
-  if (result && result.success && result.data) {
-    sessionStorage.setItem("userId", result.data);
-    console.log("session storage", sessionStorage.getItem("userId"));
-  } else {
-    console.log("something went wrong!");
-    if (result) {
-      console.log(result);
-    }
-  }
-};
-
-const handleLogout = async () => {
-  // await fetch('/api/logout', { method: 'POST' });
-  sessionStorage.removeItem("userId");
-  console.log("session storage", sessionStorage.getItem("userId"));
-};
+import { useAuth } from "../components/AuthContext.js";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,7 +18,6 @@ function Login() {
     if (!formData.email || !formData.password) {
       return "All fields are required.";
     }
-
     return "";
   };
 
@@ -61,8 +33,27 @@ function Login() {
     setError("");
 
     try {
-      await handleLogin(formData.email, formData.password);
-      // Handle redirection or state update here
+      const response = await fetch("http://localhost:5000/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const result = await response.json();
+      if (result && result.success && result.data) {
+        login(result.data);
+        navigate("/");
+      } else {
+        setError("Invalid email or password.");
+        if (result) {
+          console.log(result);
+        }
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       setError("An unexpected error occurred.");

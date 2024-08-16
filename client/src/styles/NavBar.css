@@ -32,3 +32,8 @@
 .nav-links a:hover {
   text-decoration: underline;
 }
+
+.user-name {
+  margin-left: 10px;
+  font-weight: bold;
+}

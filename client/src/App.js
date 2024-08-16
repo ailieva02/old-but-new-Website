@@ -10,24 +10,46 @@ import Categories from "./pages/Categories";
 import AllUsers from "./pages/AllUsers";
 import SingleCategory from "./pages/SingleCategory.js";
 import NavBar from "./components/NavBar.js";
+import { AuthProvider } from "./components/AuthContext.js";
+import ProtectedRoute from "./components/ProtectedRoute.js";
 
 function App() {
   return (
     <Router>
-      <div className="App" style={{ padding: 20 }}>
-        <NavBar /> {}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/user-account" element={<UserAccount />} />
-          <Route path="/post/:id" element={<SinglePost />} />
-          <Route path="/add-edit-post" element={<AddEditPost />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/all-users" element={<AllUsers />} />
-          <Route path="/category/:id" element={<SingleCategory />} />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <div className="App" style={{ padding: 20 }}>
+          <NavBar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/user-account"
+              element={<ProtectedRoute element={<UserAccount />} />}
+            />
+            <Route
+              path="/post/:id"
+              element={<ProtectedRoute element={<SinglePost />} />}
+            />
+            <Route
+              path="/add-edit-post"
+              element={<ProtectedRoute element={<AddEditPost />} />}
+            />
+            <Route
+              path="/categories"
+              element={<ProtectedRoute element={<Categories />} />}
+            />
+            <Route
+              path="/all-users"
+              element={<ProtectedRoute element={<AllUsers />} />}
+            />
+            <Route
+              path="/category/:id"
+              element={<ProtectedRoute element={<SingleCategory />} />}
+            />
+          </Routes>
+        </div>
+      </AuthProvider>
     </Router>
   );
 }
