@@ -1,49 +1,148 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import "../styles/Categories.css";
+import CategoryCard from "../components/CategoryCard";
+import CategoryModal from "../components/CategoryModal";
 
 function Categories() {
-  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [modalType, setModalType] = useState(null);
 
-  const categories = [
-    { id: 1, name: "Technology", description: "Posts related to technology." },
-    { id: 2, name: "Science", description: "Posts related to science." },
-    { id: 3, name: "Travel", description: "Posts related to travel." },
-    { id: 4, name: "Food", description: "Posts related to food." },
-    { id: 5, name: "Lifestyle", description: "Posts related to lifestyle." },
-    {
-      id: 6,
-      name: "Entertainment",
-      description: "Posts related to entertainment.",
-    },
-    { id: 7, name: "Health", description: "Posts related to health." },
-    { id: 8, name: "Sports", description: "Posts related to sports." },
-    { id: 9, name: "Education", description: "Posts related to education." },
-    { id: 10, name: "Finance", description: "Posts related to finance." },
-    { id: 11, name: "Business", description: "Posts related to business." },
-    { id: 12, name: "Art", description: "Posts related to art." },
-  ];
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/categories");
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      setCategories(result.data || []);
+    } catch (error) {
+      setError(`Error fetching categories: ${error.message}`);
+    }
+  };
 
-  const handleCategoryClick = (id) => {
-    navigate(`/category/${id}`);
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleEnter = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/categories/${id}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+    } catch (error) {
+      console.error(`Error fetching category details: ${error.message}`);
+    }
+  };
+
+  const handleEdit = (id) => {
+    setSelectedCategory(id);
+    setModalType("edit");
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/categories/delete`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        fetchCategories(); // Refresh the category list
+      } catch (error) {
+        console.error(`Error deleting category: ${error.message}`);
+      }
+    }
+  };
+
+  const handleSave = async (category) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/categories/${
+          modalType === "edit" ? "update" : "create"
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: category.title,
+            ...(modalType === "edit" && { id: selectedCategory }),
+            created_at:
+              modalType === "create" ? new Date().toISOString() : undefined,
+            user_id: sessionStorage.getItem("userId"),
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      fetchCategories(); // Refresh the category list
+    } catch (error) {
+      console.error(`Error saving category: ${error.message}`);
+    }
+  };
+
+  const handleModalClose = () => {
+    setSelectedCategory(null);
+    setModalType(null);
   };
 
   return (
     <div className="categories-container">
       <h1>Categories Page</h1>
-      <p>This is where categories will be shown.</p>
+      <button
+        className="add-category-button"
+        onClick={() => {
+          setModalType("create");
+          setSelectedCategory(null);
+        }}
+      >
+        Add Category
+      </button>
       <div className="categories-list">
-        {categories.map((category) => (
-          <div
-            key={category.id}
-            className="category-card"
-            onClick={() => handleCategoryClick(category.id)}
-          >
-            <h2>{category.name}</h2>
-            <p>{category.description}</p>
-          </div>
-        ))}
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <CategoryCard
+              key={category.id}
+              id={category.id}
+              title={category.title}
+              createdAt={category.created_at}
+              userId={category.user_id}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onEnter={handleEnter}
+            />
+          ))
+        ) : (
+          <p className="no-categories">No categories available</p>
+        )}
       </div>
+      <CategoryModal
+        isOpen={modalType !== null}
+        onClose={handleModalClose}
+        onSave={handleSave}
+        initialTitle={
+          selectedCategory
+            ? categories.find((cat) => cat.id === selectedCategory)?.title
+            : ""
+        }
+        type={modalType}
+      />
     </div>
   );
 }

@@ -1,28 +1,35 @@
 /* Categories.css */
+
 .categories-container {
   padding: 20px;
+  background-color: #e0f4f1;
+}
+
+.categories-container h1 {
+  margin-bottom: 20px;
+}
+
+.add-category-button {
+  display: block;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #76c7c0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .categories-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+  justify-content: start;
 }
 
-.category-card {
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  width: 200px;
-}
-
-.category-card h2 {
+.no-categories {
   font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.category-card p {
-  font-size: 14px;
-  color: #555;
+  color: #888;
+  text-align: center;
 }

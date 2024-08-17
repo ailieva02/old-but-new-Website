@@ -46,7 +46,8 @@ function Login() {
 
       const result = await response.json();
       if (result && result.success && result.data) {
-        login(result.data);
+        const { id: userId, role } = result.data;
+        login(userId, role);
         navigate("/");
       } else {
         setError("Invalid email or password.");

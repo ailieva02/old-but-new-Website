@@ -1,0 +1,53 @@
+/* CategoryCard.css */
+
+.category-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  width: 250px;
+  background-color: #d0f0c0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-card h2 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.category-card p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.card-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.card-button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #76c7c0;
+  color: white;
+}
+
+.card-button.edit {
+  background-color: #ffa500; /* Orange for edit */
+}
+
+.card-button.delete {
+  background-color: #ff6347; /* Tomato for delete */
+}
+
+.card-button.enter {
+  background-color: #4caf50; /* Green for enter */
+}
+
+.card-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

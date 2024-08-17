@@ -86,7 +86,10 @@ const authenticateUser = async (email, password) => {
 
       response.status = 200;
       response.success = true;
-      response.data = user.id;
+      response.data = {
+        id: user.id,
+        role: user.role,
+      };
 
       resolve(response);
     }
@@ -190,7 +193,7 @@ const deleteUserById = (id) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `DELETE FROM User 
+    const query = `DELETE FROM Users 
                        WHERE id = ?`;
 
     connection.query(query, [id], (error, results) => {
