@@ -1,7 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const connection = require("./dbConn.js");
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const connection = require('./dbConn.js')
 
 dotenv.config();
 
@@ -16,13 +16,20 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
-const userRoutes = require("./routes/userRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
-app.use("/api", userRoutes);
-app.use("/api", categoryRoutes);
+const userRoutes = require('./routes/userRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const postRoutes = require('./routes/postRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+const ratingRoutes = require('./routes/ratingRoutes');
+
+app.use('/api', userRoutes);
+app.use('/api', categoryRoutes);
+app.use('/api', postRoutes);
+app.use('/api', commentRoutes);
+app.use('/api', ratingRoutes);
 
 dotenv.config();
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });

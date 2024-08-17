@@ -6,6 +6,8 @@ class PostModel {
     body;
     image;
     created_at;
+
+    constructor() { }
 }
 
 module.exports = PostModel
