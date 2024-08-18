@@ -1,0 +1,59 @@
+/* Style for the main container */
+.add-edit-post-container {
+  margin-top: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-right: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #d0f0c0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+button {
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+}
+
+button[type="submit"] {
+  background-color: #76c7c0;
+}
+
+button[type="button"] {
+  background-color: #ccc;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}

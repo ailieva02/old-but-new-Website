@@ -1,238 +1,121 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import PostCard from "../components/PostCard";
 import "../styles/Home.css";
-import img1 from "../assets/images/img1.png";
-import img2 from "../assets/images/img2.png";
-import img3 from "../assets/images/img3.png";
-import img4 from "../assets/images/img4.png";
-import img5 from "../assets/images/img5.png";
-import img6 from "../assets/images/img6.png";
-import img7 from "../assets/images/img7.png";
-import img8 from "../assets/images/img8.png";
-import img9 from "../assets/images/img9.png";
-import img10 from "../assets/images/img10.png";
-import img11 from "../assets/images/img11.png";
-import img12 from "../assets/images/img12.png";
 
 function Home() {
-  const posts = [
-    {
-      id: 1,
-      title: "Tech Post 1",
-      body: "This is a tech post body by John Doe.",
-      image: img1,
-      category: "Tech",
-    },
-    {
-      id: 2,
-      title: "Science Post 1",
-      body: "This is a science post body by John Doe.",
-      image: img2,
-      category: "Science",
-    },
-    {
-      id: 3,
-      title: "Travel Post 1",
-      body: "This is a travel post body by Jane Smith.",
-      image: img3,
-      category: "Travel",
-    },
-    {
-      id: 4,
-      title: "Food Post 1",
-      body: "This is a food post body by Jane Smith.",
-      image: img4,
-      category: "Food",
-    },
-    {
-      id: 5,
-      title: "Tech Post 2",
-      body: "This is another tech post body by John Doe.",
-      image: img5,
-      category: "Tech",
-    },
-    {
-      id: 6,
-      title: "Science Post 2",
-      body: "This is another science post body by John Doe.",
-      image: img6,
-      category: "Science",
-    },
-    {
-      id: 7,
-      title: "Travel Post 2",
-      body: "This is another travel post body by Jane Smith.",
-      image: img7,
-      category: "Travel",
-    },
-    {
-      id: 8,
-      title: "Food Post 2",
-      body: "This is another food post body by Jane Smith.",
-      image: img8,
-      category: "Food",
-    },
-    {
-      id: 9,
-      title: "Tech Post 3",
-      body: "This is yet another tech post body by John Doe.",
-      image: img9,
-      category: "Tech",
-    },
-    {
-      id: 10,
-      title: "Science Post 3",
-      body: "This is yet another science post body by John Doe.",
-      image: img10,
-      category: "Science",
-    },
-    {
-      id: 11,
-      title: "Travel Post 3",
-      body: "This is yet another travel post body by Jane Smith.",
-      image: img11,
-      category: "Travel",
-    },
-    {
-      id: 12,
-      title: "Food Post 3",
-      body: "This is yet another food post body by Jane Smith.",
-      image: img12,
-      category: "Food",
-    },
-    {
-      id: 13,
-      title: "Tech Post 4",
-      body: "This is a tech post body by John Doe.",
-      image: img1,
-      category: "Tech",
-    },
-    {
-      id: 14,
-      title: "Science Post 4",
-      body: "This is a science post body by John Doe.",
-      image: img2,
-      category: "Science",
-    },
-    {
-      id: 15,
-      title: "Travel Post 4",
-      body: "This is a travel post body by Jane Smith.",
-      image: img3,
-      category: "Travel",
-    },
-    {
-      id: 16,
-      title: "Food Post 4",
-      body: "This is a food post body by Jane Smith.",
-      image: img4,
-      category: "Food",
-    },
-    {
-      id: 17,
-      title: "Tech Post 5",
-      body: "This is another tech post body by John Doe.",
-      image: img5,
-      category: "Tech",
-    },
-    {
-      id: 18,
-      title: "Science Post 5",
-      body: "This is another science post body by John Doe.",
-      image: img6,
-      category: "Science",
-    },
-    {
-      id: 19,
-      title: "Travel Post 5",
-      body: "This is another travel post body by Jane Smith.",
-      image: img7,
-      category: "Travel",
-    },
-    {
-      id: 20,
-      title: "Food Post 5",
-      body: "This is another food post body by Jane Smith.",
-      image: img8,
-      category: "Food",
-    },
-    {
-      id: 21,
-      title: "Tech Post 6",
-      body: "This is yet another tech post body by John Doe.",
-      image: img9,
-      category: "Tech",
-    },
-    {
-      id: 22,
-      title: "Science Post 6",
-      body: "This is yet another science post body by John Doe.",
-      image: img10,
-      category: "Science",
-    },
-    {
-      id: 23,
-      title: "Travel Post 6",
-      body: "This is yet another travel post body by Jane Smith.",
-      image: img11,
-      category: "Travel",
-    },
-    {
-      id: 24,
-      title: "Food Post 6",
-      body: "This is yet another food post body by Jane Smith.",
-      image: img12,
-      category: "Food",
-    },
-    {
-      id: 25,
-      title: "Tech Post 7",
-      body: "This is a tech post body by John Doe.",
-      image: img1,
-      category: "Tech",
-    },
-    {
-      id: 26,
-      title: "Science Post 7",
-      body: "This is a science post body by John Doe.",
-      image: img2,
-      category: "Science",
-    },
-    {
-      id: 27,
-      title: "Travel Post 7",
-      body: "This is a travel post body by Jane Smith.",
-      image: img3,
-      category: "Travel",
-    },
-    {
-      id: 28,
-      title: "Food Post 7",
-      body: "This is a food post body by Jane Smith.",
-      image: img4,
-      category: "Food",
-    },
-  ];
+  const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
+  const categoryRefs = useRef({});
+  const navigate = useNavigate();
 
-  const categories = [...new Set(posts.map((post) => post.category))];
+  // Fetch posts from the API
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/posts");
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      setPosts(result.data || []);
+    } catch (error) {
+      setError(`Error fetching posts: ${error.message}`);
+    }
+  };
+
+  // Fetch categories from the API
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/categories");
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      setCategories(result.data || []);
+    } catch (error) {
+      setError(`Error fetching categories: ${error.message}`);
+    }
+  };
+
+  // Fetch users from the API
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/users");
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      setUsers(result.data || []);
+    } catch (error) {
+      setError(`Error fetching users: ${error.message}`);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+    fetchCategories();
+    fetchUsers();
+  }, []);
+
+  // Handle vertical scroll to horizontal scroll in category sections
+  const handleScroll = (e, category) => {
+    const container = categoryRefs.current[category];
+    if (container) {
+      container.scrollLeft += e.deltaY;
+    }
+  };
+
+  // Organize posts by category
+  const postsByCategory = categories.reduce((acc, category) => {
+    const filteredPosts = posts
+      .filter((post) => post.category_id === category.id)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort posts by date, latest first
+    if (filteredPosts.length > 0) {
+      acc[category.title] = filteredPosts;
+    }
+    return acc;
+  }, {});
+
+  // Find user by ID
+  const findUserNameById = (userId) => {
+    const user = users.find((user) => user.id === userId);
+    return user ? user.username : "Unknown User";
+  };
 
   return (
     <div className="home-container">
-      {categories.map((category) => (
-        <div key={category} className="category-section">
+      {error && <p className="error-message">{error}</p>}
+
+      <button
+        className="add-post-button"
+        onClick={() => navigate("/add-edit-post")}
+      >
+        Add Post
+      </button>
+
+      {Object.entries(postsByCategory).map(([category, posts]) => (
+        <div
+          key={category}
+          className="category-section"
+          onWheel={(e) => handleScroll(e, category)}
+          ref={(el) => (categoryRefs.current[category] = el)}
+        >
           <h2 className="category-title">{category}</h2>
           <div className="post-container">
-            {posts
-              .filter((post) => post.category === category)
-              .map((post) => (
-                <PostCard
-                  key={post.id}
-                  id={post.id}
-                  title={post.title}
-                  body={post.body}
-                  image={post.image}
-                />
-              ))}
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                id={post.id}
+                title={post.title}
+                body={post.body}
+                image={post.image}
+                rating={post.rating}
+                user={findUserNameById(post.user_id)}
+                created_at={post.created_at}
+              />
+            ))}
           </div>
         </div>
       ))}
