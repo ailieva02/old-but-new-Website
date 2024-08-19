@@ -1,13 +1,103 @@
-import React from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import PostInfo from "../components/PostInfo";
+import CommentsSection from "../components/CommentsSection";
+import "../styles/SinglePost.css";
+
+const getImage = (imageName) => {
+  try {
+    return require(`../assets/images/${imageName}`);
+  } catch (err) {
+    console.error(`Image not found: ${imageName}`);
+    return require(`../assets/images/default.png`);
+  }
+};
 
 function SinglePost() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [averageRating, setAverageRating] = useState(0);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/posts/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch the post data");
+        }
+        const data = await response.json();
+        setPost(data.data[0]);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchAverageRating = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/ratings-average-by-post-id?post_id=${id}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch the average rating");
+        }
+        const data = await response.json();
+        setAverageRating(data.data[0].average_stars || 0);
+      } catch (error) {
+        console.error(`Error fetching average rating: ${error.message}`);
+      }
+    };
+
+    fetchPost();
+    fetchAverageRating();
+  }, [id]);
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/posts/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the post");
+      }
+
+      navigate("/");
+    } catch (error) {
+      console.error(`Error deleting post: ${error.message}`);
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/edit-post/${id}`);
+  };
+
+  if (loading) {
+    return <p className="loading">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="error">Error: {error}</p>;
+  }
 
   return (
-    <div>
-      <h1>Single Post Page</h1>
-      <p>Displaying details for post with ID: {id}</p>
+    <div className="single-post">
+      <PostInfo
+        post={post}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        getImage={getImage}
+        averageRating={averageRating}
+      />
+      <CommentsSection postId={id} />
     </div>
   );
 }

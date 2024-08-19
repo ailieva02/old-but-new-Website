@@ -1,0 +1,42 @@
+.single-post {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.single-post h1 {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+.single-post p {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+.single-post img {
+  max-width: 100%;
+  height: auto;
+}
+
+.single-post .buttons {
+  margin-top: 20px;
+}
+
+.single-post .buttons button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  background-color: #76c7c0;
+  color: #fff;
+  cursor: pointer;
+}
+
+.single-post .buttons button:hover {
+  background-color: #5b9b9a;
+}
+
+.single-post .error {
+  color: red;
+  font-weight: bold;
+}

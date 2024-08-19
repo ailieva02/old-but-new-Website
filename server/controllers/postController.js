@@ -2,24 +2,22 @@ const PostModel = require("../models/postModel");
 const postService = require("../services/postService");
 
 const createPost = async (req, res) => {
-  const { category_id, title, body, user_id } = req.body;
-  const image = req.file ? req.file.filename : null; // Get the uploaded file name
+  const newPost = new PostModel();
 
-  const postModel = {
-    category_id,
-    title,
-    body,
-    image,
-    user_id,
-  };
+  newPost.category_id = req.body.category_id;
+  newPost.user_id = req.body.user_id;
+  newPost.title = req.body.title;
+  newPost.body = req.body.body;
+  newPost.image = req.body.image;
 
-  try {
-    const response = await postService.createPost(postModel);
-    res.status(response.status).json(response);
-  } catch (error) {
-    res.status(error.status || 500).json(error);
+  const result = await postService.createPost(newPost);
+  if (result) {
+    res.status(result.status).json(result);
+  } else {
+    res.status(500).json("Something went wrong!");
   }
 };
+
 const updatePost = async (req, res) => {
   const postId = parseInt(req.body.id);
   const postToUpdate = await postService.getPostById(postId);

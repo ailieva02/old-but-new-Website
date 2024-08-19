@@ -1,0 +1,89 @@
+.comments-section {
+  margin-top: 20px;
+  background-color: #e0f4f1;
+  padding: 30px;
+}
+.comments-section h2 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.comments-section .new-comment {
+  margin-bottom: 20px;
+}
+
+.comments-section textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.comments-section .add-comment-button {
+  padding: 10px 20px;
+  background-color: #76c7c0;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.comments-section .add-comment-button:hover {
+  background-color: #5b9b9a;
+}
+
+.comments-section .comments-list {
+  list-style: none;
+  padding: 10px;
+  background-color: #d0f0c0;
+}
+
+.comments-section .comment-item {
+  border-bottom: 1px solid #000000;
+  padding: 10px 0;
+}
+
+.comments-section .comment-content {
+  margin-bottom: 10px;
+}
+
+.comments-section .edit-comment {
+  margin-bottom: 10px;
+}
+
+.comments-section .edit-comment textarea {
+  width: 100%;
+}
+
+.comments-section .save-button,
+.comments-section .cancel-button,
+.comments-section .edit-button,
+.comments-section .delete-button {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.comments-section .save-button {
+  background-color: #76c7c0;
+}
+
+.comments-section .cancel-button {
+  background-color: #ccc;
+}
+
+.comments-section .edit-button {
+  background-color: #ffa500;
+}
+
+.comments-section .delete-button {
+  background-color: #ff4d4d;
+}
+
+.comments-section .error {
+  color: red;
+  font-weight: bold;
+}

@@ -1,0 +1,86 @@
+.post-info {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #e0f4f1;
+}
+
+.post-title {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+.post-body {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+.post-category,
+.post-author,
+.post-rating {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.post-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 20px;
+}
+
+.post-actions {
+  margin-top: 20px;
+}
+
+.edit-button,
+.delete-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: #ffa500;
+}
+
+.delete-button {
+  background-color: #ff4d4d;
+}
+
+.error-message,
+.success-message {
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.error-message {
+  color: #d9534f;
+}
+
+.success-message {
+  color: #5bc0de;
+}
+
+.ratings-section {
+  margin-top: 20px;
+}
+
+.ratings-list {
+  list-style: none;
+  padding: 0;
+}
+
+.rating-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.rating-form {
+  margin-top: 20px;
+}
