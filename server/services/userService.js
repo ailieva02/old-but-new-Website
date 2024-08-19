@@ -104,38 +104,54 @@ const updateUser = (UserModel) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `UPDATE User 
-                       SET name = ?, lastname = ?, username = ?, password = ?, email = ?, role = ?
-                       WHERE id = ?`;
+    // Check if password is provided, otherwise don't include it in the update query
+    let query = `UPDATE User 
+                 SET name = ?, lastname = ?, username = ?, email = ?, role = ?
+                 WHERE id = ?`;
+    let params = [
+      UserModel.name,
+      UserModel.lastname,
+      UserModel.username,
+      UserModel.email,
+      UserModel.role,
+      UserModel.id,
+    ];
 
-    const hashedPassword = await argon2.hash(UserModel.password);
-
-    connection.query(
-      query,
-      [
-        UserModel.name,
-        UserModel.lastname,
-        UserModel.username,
-        hashedPassword,
-        UserModel.email,
-        UserModel.role,
-        UserModel.id,
-      ],
-      (error, results) => {
-        if (error) {
-          console.log(error);
-          response.success = false;
-          response.message = `Error querying the database: ${error}`;
-
-          reject(response);
-        } else {
-          response.status = 200;
-          response.success = true;
-
-          resolve(response);
-        }
+    // Only include the password in the query if it's provided
+    if (UserModel.password) {
+      try {
+        const hashedPassword = await argon2.hash(UserModel.password);
+        query = `UPDATE User 
+                 SET name = ?, lastname = ?, username = ?, password = ?, email = ?, role = ?
+                 WHERE id = ?`;
+        params = [
+          UserModel.name,
+          UserModel.lastname,
+          UserModel.username,
+          hashedPassword,
+          UserModel.email,
+          UserModel.role,
+          UserModel.id,
+        ];
+      } catch (error) {
+        response.success = false;
+        response.message = `Error hashing password: ${error.message}`;
+        return reject(response);
       }
-    );
+    }
+
+    connection.query(query, params, (error, results) => {
+      if (error) {
+        console.log(error);
+        response.success = false;
+        response.message = `Error querying the database: ${error.message}`;
+        return reject(response);
+      } else {
+        response.status = 200;
+        response.success = true;
+        resolve(response);
+      }
+    });
   });
 };
 
@@ -193,7 +209,7 @@ const deleteUserById = (id) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `DELETE FROM Users 
+    const query = `DELETE FROM User 
                        WHERE id = ?`;
 
     connection.query(query, [id], (error, results) => {

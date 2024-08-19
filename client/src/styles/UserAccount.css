@@ -1,0 +1,41 @@
+/* User Account Container Styles */
+.user-account-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #e0f4f1; /* Light Green */
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* Title Styles */
+.user-account-container h1 {
+  text-align: center;
+  color: #4a773c; /* Dark Green */
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+/* User Info Styles */
+.user-info {
+  font-size: 18px;
+  color: #4a773c; /* Dark Green */
+}
+
+.user-info p {
+  margin: 10px 0;
+}
+
+/* Bold Text Styles */
+.user-info b {
+  color: #76c7c0; /* Medium Aquamarine */
+}
+
+/* Loader and Error Message Styles */
+p {
+  text-align: center;
+  color: #4a773c; /* Dark Green */
+  font-size: 18px;
+}
