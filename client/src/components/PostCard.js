@@ -31,7 +31,6 @@ function PostCard({ id, title, body, image, rating, user, created_at }) {
         <div className="post-content">
           <h3 className="post-title">{title}</h3>
           <p className="post-body">{body}</p>
-          <p className="post-rating">Rating: {rating} / 5</p>
           <p className="post-user">Added by: {user}</p>
           <p className="post-date">Created on: {formattedDate}</p>
         </div>

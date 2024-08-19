@@ -1,0 +1,30 @@
+.post-container {
+  background-color: #e0f4f1;
+  margin-top: 10px;
+}
+
+.update-category-button,
+.delete-category-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.update-category-button {
+  background-color: #ffa500; /* Medium Aquamarine */
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.delete-category-button {
+  background-color: #ff4d4d; /* Light Coral */
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+/* update-category-button
+
+delete-category-button */
