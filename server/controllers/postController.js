@@ -2,19 +2,26 @@ const PostModel = require("../models/postModel");
 const postService = require("../services/postService");
 
 const createPost = async (req, res) => {
-  const newPost = new PostModel();
+  try {
+    const { category_id, user_id, title, body } = req.body;
+    const image = req.file ? req.file.filename : "default.png";
 
-  newPost.category_id = req.body.category_id;
-  newPost.user_id = req.body.user_id;
-  newPost.title = req.body.title;
-  newPost.body = req.body.body;
-  newPost.image = req.body.image;
+    const postModel = {
+      category_id,
+      user_id,
+      title,
+      body,
+      image,
+    };
 
-  const result = await postService.createPost(newPost);
-  if (result) {
-    res.status(result.status).json(result);
-  } else {
-    res.status(500).json("Something went wrong!");
+    const response = await postService.createPost(postModel);
+    res.status(response.status).json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error creating the post",
+      error: error.message,
+    });
   }
 };
 
