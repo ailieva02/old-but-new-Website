@@ -100,7 +100,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
         user_id: userId,
         stars,
       });
-
+  
       const response = await fetch(
         `http://localhost:5000/api/ratings/${endpoint}`,
         {
@@ -109,12 +109,12 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
           body,
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to submit rating");
       }
-
-      fetchAdditionalData();
+  
+      fetchAdditionalData();  // Refresh ratings and average
       setSuccessMessage("Rating submitted successfully!");
     } catch (error) {
       setError(`Failed to submit rating: ${error.message}`);

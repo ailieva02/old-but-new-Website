@@ -86,7 +86,7 @@ const getAverageRatingForPostId = (post_id) => {
       } else {
         response.status = 200;
         response.success = true;
-        response.data = results[0]; // Ensure you're returning the correct result
+        response.data = results[0]; 
 
         resolve(response);
       }
@@ -180,50 +180,77 @@ const createRating = (RatingModel) => {
   });
 };
 
-const updateRating = (RatingModel) => {
-  return new Promise(async (resolve, reject) => {
+const updateRating = (rating) => {
+  return new Promise((resolve, reject) => {
     const response = new ResponseModel();
-
-    // Validate id
-    if (isNaN(RatingModel.id)) {
+    console.log("This is the response: ", response);
+    
+    // Ensure the rating object has the id
+    if (!rating.id) {
       response.success = false;
-      response.message = "Invalid rating ID.";
+      response.message = "Rating ID is missing!";
       return reject(response);
     }
+    
+    const query = "UPDATE Rating SET stars = ? WHERE id = ?";
+    console.log("Rating stars: ", rating.stars);
+    console.log("Rating ID: ", rating.id);
 
-    const query = `UPDATE Rating 
-                      SET stars = ?
-                      WHERE id = ?`;
-
-    connection.query(
-      query,
-      [RatingModel.stars, RatingModel.id],
-      (error, results) => {
-        if (error) {
-          console.log(error);
-          response.success = false;
-          response.message = `Error querying the database: ${error}`;
-
-          reject(response);
-        } else {
-          response.status = 200;
-          response.success = true;
-
-          resolve(response);
-        }
+    connection.query(query, [rating.stars, rating.id], (error, results) => {
+      if (error) {
+        response.success = false;
+        response.message = `Error updating the rating: ${error}`;
+        return reject(response);
+      } else {
+        response.status = 200;
+        response.success = true;
+        response.message = "Rating updated successfully!";
+        resolve(response);
       }
-    );
+    });
   }).catch((error) => {
-    if (error instanceof ResponseModel) {
-      return error;
-    } else {
-      const response = new ResponseModel();
-      response.message = error;
-      response.success = false;
-      return response;
-    }
+    const response = new ResponseModel();
+    response.message = error.message || error;
+    response.success = false;
+    return response;
   });
 };
+
+const getRatingByPostAndUser = (post_id, user_id) => {
+  return new Promise((resolve, reject) => {
+    const response = new ResponseModel();
+
+    const query = "SELECT * FROM Rating WHERE post_id = ? AND user_id = ?";
+
+    connection.query(query, [post_id, user_id], (error, results) => {
+      if (error) {
+        response.success = false;
+        response.message = `Error querying the database: ${error}`;
+        return reject(response); // Reject with response
+      } else {
+        if (results.length > 0) {
+          const rating = results[0]; 
+          console.log("Rating fetched: ", rating);  // Check if 'id' is in the result
+          response.status = 200;
+          response.success = true;
+          response.data = rating; // Pass the full rating object
+        } else {
+          response.status = 404;
+          response.success = false;
+          response.message = "No rating found for this user and post";
+        }
+        resolve(response); // Resolve with response
+      }
+    });
+  }).catch((error) => {
+    const response = new ResponseModel();
+    response.message = error.message || error;
+    response.success = false;
+    return response;
+  });
+};
+
+
 
 const deleteRatingById = (id) => {
   return new Promise(async (resolve, reject) => {
@@ -265,4 +292,5 @@ module.exports = {
   createRating,
   updateRating,
   deleteRatingById,
+  getRatingByPostAndUser,
 };

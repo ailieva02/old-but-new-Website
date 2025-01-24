@@ -17,19 +17,51 @@ const createRating = async (req, res) => {
 };
 
 const updateRating = async (req, res) => {
-  const ratingId = parseInt(req.body.id);
-  const ratingToUpdate = await ratingService.getRatingById(ratingId);
+  const { post_id, user_id, stars } = req.body;
 
-  ratingToUpdate.id = ratingId;
-  ratingToUpdate.stars = req.body.stars;
+  try {
+    // Step 1: Check if the user already has a rating for the post
+    const existingRatingResponse = await ratingService.getRatingByPostAndUser(post_id, user_id);
+    const existingRating = existingRatingResponse.data;  // Access the rating object directly
+    
+    if (!existingRating) {
+      // If no rating exists for this user and post, return 404
+      return res.status(404).json({ message: "Rating not found for this user and post" });
+    }
 
-  const result = await ratingService.updateRating(ratingToUpdate);
-  if (result) {
-    res.status(result.status).json(result);
-  } else {
-    res.status(500).json("Something went wrong!");
+    // Step 2: Update the rating, including the id
+    existingRating.stars = stars;
+
+    const result = await ratingService.updateRating(existingRating);  // Pass the complete object
+    if (result) {
+      res.status(result.status).json(result);  // Successful update
+    } else {
+      res.status(500).json({ message: "Something went wrong during the update!" });
+    }
+  } catch (error) {
+    console.error("Error updating rating:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+const getRatingByPostAndUser = async (req, res) => {
+  const { post_id, user_id } = req.query;
+
+  try {
+    const result = await ratingService.getRatingByPostAndUser(post_id, user_id);
+
+    if (result.success && result.data) {
+      res.status(result.status).json(result);
+    } else {
+      res.status(404).json({ message: "Rating not found for this post and user combination" });
+    }
+  } catch (error) {
+    console.error("Error fetching rating by post and user:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 
 const getAllRatingsByPostId = async (req, res) => {
   const post_id = parseInt(req.query.post_id);
@@ -87,4 +119,6 @@ module.exports = {
   getRatingById,
   getAverageRatingForPostId,
   deleteRatingById,
+  getAverageRatingForPostId,
+  getRatingByPostAndUser,
 };

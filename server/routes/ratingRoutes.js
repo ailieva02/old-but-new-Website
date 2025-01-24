@@ -8,8 +8,9 @@ router.get(
   "/ratings-average-by-post-id",
   ratingController.getAverageRatingForPostId
 );
+router.get("/ratings-by-post-and-user", ratingController.getAllRatingsByPostId);
 router.post("/ratings/delete", ratingController.deleteRatingById);
 router.post("/ratings/create", ratingController.createRating);
-router.post("/ratings/update", ratingController.updateRating);
+router.put("/ratings/update", ratingController.updateRating);
 
 module.exports = router;
