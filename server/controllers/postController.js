@@ -26,21 +26,32 @@ const createPost = async (req, res) => {
 };
 
 const updatePost = async (req, res) => {
-  const postId = parseInt(req.body.id);
-  const postToUpdate = await postService.getPostById(postId);
+  try {
+    const { id, category_id, title, body, image, user_id } = req.body;
+    const newImage = req.file ? req.file.filename : image;
+    const postModel = {
+      id: parseInt(id),
+      category_id: parseInt(category_id),
+      user_id,
+      title,
+      body,
+      image: newImage,
+    };
 
-  postToUpdate.id = postId;
-  postToUpdate.title = req.body.title;
-  postToUpdate.body = req.body.body;
-  postToUpdate.image = req.body.image;
-
-  const result = await postService.updatePost(postToUpdate);
-  if (result) {
-    res.status(result.status).json(result);
-  } else {
-    res.status(500).json("Something went wrong!");
+    const response = await postService.updatePost(postModel);
+    res.status(response.status).json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating the post",
+      error: error.message,
+    });
   }
 };
+
+
+
+
 
 const deletePostById = async (req, res) => {
   const postId = parseInt(req.body.id);

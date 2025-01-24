@@ -48,24 +48,30 @@ function EditPost() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("id", id);
-    formData.append("category_id", category);
-    formData.append("title", title);
-    formData.append("body", body);
-    formData.append("user_id", sessionStorage.getItem("userId"));
-
+  
+    const formData = {
+      id: parseInt(id),
+      category_id: category,
+      title: title,
+      body: body,
+      user_id: sessionStorage.getItem("userId"),
+    };
+  
     try {
       const response = await fetch("http://localhost:5000/api/posts/update", {
-        method: "POST",
-        body: formData,
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
-
+  
+      const data = await response.json();
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! Status: ${response.status}`);
       }
-
+  
+      console.log("Post updated successfully:", data);
       navigate("/"); // Redirect to homepage after successful update
     } catch (error) {
       console.error(`Error updating post: ${error.message}`);

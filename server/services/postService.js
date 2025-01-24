@@ -100,39 +100,71 @@ const updatePost = (PostModel) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `UPDATE Post 
-                        SET title = ?, body = ?, image = ?
-                        WHERE id = ?`;
+    // Validate the new category
+    const categoryCheck = await categoryService.getCategoryById(PostModel.category_id);
+    if (!categoryCheck.success || categoryCheck.data.length === 0) {
+      response.success = false;
+      response.message = `Category with id ${PostModel.category_id} does not exist.`;
+      response.status = 404;
+      return reject(response);
+    }
 
+    // Ensure title uniqueness in the new category
+    const titleConflict = await getPostByCategoryIdAndTitle(PostModel.category_id, PostModel.title);
+    if (titleConflict.data && titleConflict.data.some(post => post.id !== PostModel.id)) {
+      response.success = false;
+      response.message = `The title "${PostModel.title}" is already used in this category.`;
+      response.status = 409;
+      return reject(response);
+    }
+    
+if (!PostModel.id || !PostModel.category_id || !PostModel.user_id) {
+  response.success = false;
+  response.message = "Missing required fields for update.";
+  return reject(response);
+}
+
+    // Update query (no need to update image, as it remains the same unless provided)
+    const query = `UPDATE Post 
+                   SET category_id = ?, title = ?, body = ? 
+                   WHERE id = ? AND user_id = ?`;
+
+    // Use PostModel.user_id from the post itself (instead of session user ID)
     connection.query(
       query,
-      [PostModel.title, PostModel.body, PostModel.image, PostModel.id],
+      [PostModel.category_id, PostModel.title, PostModel.body, PostModel.id, PostModel.user_id],
       (error, results) => {
         if (error) {
-          console.log(error);
           response.success = false;
           response.message = `Error querying the database: ${error}`;
-
-          reject(response);
-        } else {
-          response.status = 200;
-          response.success = true;
-
-          resolve(response);
+          return reject(response);
         }
+
+        // Check if any rows were updated
+        if (results.affectedRows === 0) {
+          response.success = false;
+          response.message = "No post was updated. Please check the post ID or your permissions.";
+          return reject(response);
+        }
+
+        response.status = 200;
+        response.success = true;
+        response.message = "Post updated successfully.";
+        resolve(response);
       }
     );
   }).catch((error) => {
-    if (error instanceof ResponseModel) {
-      return error;
-    } else {
-      const response = new ResponseModel();
-      response.message = error;
-      response.success = false;
-      return response;
-    }
+    if (error instanceof ResponseModel) return error;
+
+    const response = new ResponseModel();
+    response.message = error;
+    response.success = false;
+    return response;
   });
 };
+
+
+
 
 const deletePostById = (id) => {
   return new Promise(async (resolve, reject) => {

@@ -30,6 +30,8 @@ router.get("/posts-by-user-id", postController.getPostsByUserId);
 router.post("/posts/create", upload.single("image"), postController.createPost);
 router.post("/posts/delete", postController.deletePostById);
 router.post("/posts/delete-all", postController.deleteAllPosts);
-router.post("/posts/update", postController.updatePost);
+router.put("/posts/update", postController.updatePost);
+
+
 
 module.exports = router;
