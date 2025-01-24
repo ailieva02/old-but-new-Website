@@ -100,7 +100,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
         user_id: userId,
         stars,
       });
-  
+
       const response = await fetch(
         `http://localhost:5000/api/ratings/${endpoint}`,
         {
@@ -109,15 +109,45 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
           body,
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to submit rating");
       }
-  
+
       fetchAdditionalData();  // Refresh ratings and average
       setSuccessMessage("Rating submitted successfully!");
     } catch (error) {
       setError(`Failed to submit rating: ${error.message}`);
+    }
+  };
+
+  const deleteRating = async (ratingId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/ratings/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rating_id: ratingId }), // Sending ratingId in the request body
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete rating");
+      }
+  
+      // Remove the deleted rating from the list and update the state
+      const updatedRatings = ratings.filter((rating) => rating.id !== ratingId);
+      setRatings(updatedRatings);
+  
+      // Recalculate average after deleting
+      calculateAverageRating(updatedRatings); // Pass the updated ratings directly
+  
+      setSuccessMessage("Rating deleted successfully!");
+    } catch (error) {
+      setError(`Failed to delete rating: ${error.message}`);
     }
   };
 
@@ -152,6 +182,12 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
             {ratings.map((rating) => (
               <li key={rating.id} className="rating-item">
                 Rating: {rating.stars} by {rating.username}
+                <button
+                  className="delete-rating-button"
+                  onClick={() => deleteRating(rating.id)}
+                >
+                  Delete
+                </button>
               </li>
             ))}
           </ul>

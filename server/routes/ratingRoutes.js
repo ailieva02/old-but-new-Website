@@ -9,7 +9,7 @@ router.get(
   ratingController.getAverageRatingForPostId
 );
 router.get("/ratings-by-post-and-user", ratingController.getAllRatingsByPostId);
-router.post("/ratings/delete", ratingController.deleteRatingById);
+router.delete("/ratings/delete", ratingController.deleteRatingById);
 router.post("/ratings/create", ratingController.createRating);
 router.put("/ratings/update", ratingController.updateRating);
 

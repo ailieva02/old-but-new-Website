@@ -102,7 +102,13 @@ const getAverageRatingForPostId = async (req, res) => {
 };
 
 const deleteRatingById = async (req, res) => {
-  const ratingId = parseInt(req.body.id);
+  const ratingId = parseInt(req.body.rating_id); // Changed 'id' to 'rating_id'
+  
+  // Check if ratingId is a valid number before proceeding
+  if (isNaN(ratingId)) {
+    return res.status(400).json({ message: "Invalid rating ID" });
+  }
+
   const result = await ratingService.deleteRatingById(ratingId);
 
   if (result) {
@@ -111,6 +117,7 @@ const deleteRatingById = async (req, res) => {
     res.status(500).json("Something went wrong!");
   }
 };
+
 
 module.exports = {
   createRating,
