@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from "react";
-import UserModal from "../components/UserModal.js";
+import { useParams } from "react-router-dom";
+import UserModal from "../components/UserModal"; // Assuming UserModal is used for editing
 import "../styles/UserAccount.css";
 
-const getCurrentUserId = async () => {
-  const userId = sessionStorage.getItem("userId");
-  return parseInt(userId, 10);
-};
-
-function UserAccount() {
+const SpecificUserDetail = () => {
+  const { userId } = useParams(); // Get the userId from the URL params
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
 
-  const fetchUserIdAndData = async () => {
+  const fetchUserData = async () => {
     try {
-      const userId = await getCurrentUserId();
-      if (!userId) {
-        throw new Error("User ID is not available");
-      }
-
       const userResponse = await fetch(
         `http://localhost:5000/api/users/${userId}`
       );
@@ -28,12 +20,7 @@ function UserAccount() {
         throw new Error(`HTTP error! Status: ${userResponse.status}`);
       }
       const userData = await userResponse.json();
-
-      if (userData.data && userData.data.length > 0) {
-        setUser(userData.data[0]);
-      } else {
-        setError("User does not exist");
-      }
+      setUser(userData.data[0]);
     } catch (error) {
       setError(`Error fetching user: ${error.message}`);
     } finally {
@@ -42,8 +29,8 @@ function UserAccount() {
   };
 
   useEffect(() => {
-    fetchUserIdAndData();
-  }, []);
+    fetchUserData();
+  }, [userId]);
 
   const handleEdit = () => {
     setModalTitle(user ? user.username : "");
@@ -51,9 +38,8 @@ function UserAccount() {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete your account?")) {
+    if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const userId = await getCurrentUserId();
         const response = await fetch(`http://localhost:5000/api/users/delete`, {
           method: "POST",
           headers: {
@@ -64,8 +50,8 @@ function UserAccount() {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        sessionStorage.removeItem("userId");
-        window.location.href = "/login";
+        // Redirect after deletion or handle accordingly
+        window.location.href = "/users"; // Redirect to a list of users or some other page
       } catch (error) {
         setError(`Error deleting user: ${error.message}`);
       }
@@ -74,7 +60,6 @@ function UserAccount() {
 
   const handleSaveUser = async (updatedUser) => {
     try {
-      const userId = await getCurrentUserId();
       const response = await fetch(`http://localhost:5000/api/users/update`, {
         method: "PUT",
         headers: {
@@ -93,7 +78,7 @@ function UserAccount() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       // Refetch user data after updating
-      await fetchUserIdAndData();
+      await fetchUserData();
       setIsModalOpen(false);
     } catch (error) {
       setError(`Error updating user: ${error.message}`);
@@ -110,7 +95,7 @@ function UserAccount() {
 
   return (
     <div className="user-account-container">
-      <h1>User Account</h1>
+      <h1>User Details</h1>
       {user ? (
         <div className="user-info">
           <p>
@@ -143,9 +128,10 @@ function UserAccount() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveUser}
         initialUser={user}
+        title={modalTitle}
       />
     </div>
   );
-}
+};
 
-export default UserAccount;
+export default SpecificUserDetail;

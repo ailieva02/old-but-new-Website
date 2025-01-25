@@ -5,7 +5,7 @@ import Login from "./pages/Login.js";
 import Register from "./pages/Register.js";
 import UserAccount from "./pages/UserAccount.js";
 import SinglePost from "./pages/SinglePost.js";
-import EditPost from "./pages/EditPost.js"; // New component for editing posts
+import EditPost from "./pages/EditPost.js"; 
 import Categories from "./pages/Categories";
 import AllUsers from "./pages/AllUsers";
 import SingleCategory from "./pages/SingleCategory.js";
@@ -13,6 +13,7 @@ import NavBar from "./components/NavBar.js";
 import { AuthProvider } from "./components/AuthContext.js";
 import ProtectedRoute from "./components/ProtectedRoute.js";
 import AddEditPost from "./pages/AddEditPost.js";
+import SpecificUserDetail from "./pages/SpecificUserDetails.js";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               path="/user-account"
               element={<ProtectedRoute element={<UserAccount />} />}
             />
+             <Route path="/users/:userId" element={<SpecificUserDetail />} />
             <Route
               path="/post/:id"
               element={<ProtectedRoute element={<SinglePost />} />}
@@ -38,7 +40,7 @@ function App() {
             />
             <Route
               path="/edit-post/:id"
-              element={<ProtectedRoute element={<EditPost />} />} // New route for editing posts
+              element={<ProtectedRoute element={<EditPost />} />} 
             />
             <Route
               path="/categories"

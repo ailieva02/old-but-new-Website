@@ -7,6 +7,7 @@ function UserModal({ isOpen, onClose, onSave, initialUser }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     if (initialUser) {
@@ -15,11 +16,12 @@ function UserModal({ isOpen, onClose, onSave, initialUser }) {
       setUsername(initialUser.username || "");
       setEmail(initialUser.email || "");
       setRole(initialUser.role || "");
+      setUserId(initialUser.id || null); // Set the specific user ID
     }
   }, [initialUser, isOpen]);
 
   const handleSave = () => {
-    onSave({ name, lastname, username, email, role });
+    onSave({ id: userId, name, lastname, username, email, role });
   };
 
   const handleCancel = () => {

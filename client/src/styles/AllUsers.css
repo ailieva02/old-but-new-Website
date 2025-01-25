@@ -1,0 +1,74 @@
+/* Container styling */
+.all-users-container {
+  padding: 20px;
+  background-color: #e0f4f1; /* Matches Categories background */
+  font-family: Arial, sans-serif;
+}
+
+/* Title styling */
+.all-users-title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Table styling */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.users-table th,
+.users-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.users-table th {
+  background-color: #76c7c0; /* Matches the button color in Categories */
+  color: black;
+  font-weight: bold;
+}
+
+.users-table tr:nth-child(even) {
+  background-color: #d2faf3;
+}
+
+/* Button styling */
+.btn {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  color: white;
+}
+
+.open-btn {
+  background-color: #4caf50; /* Matches Categories buttons */
+}
+
+.edit-btn {
+  background-color: #ffa500; /* Slightly brighter for contrast */
+}
+
+.delete-btn {
+  background-color: #ff4d4d; /* Red for delete */
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Loading and no users message */
+.loading-message,
+.no-users-message {
+  font-size: 18px;
+  color: #888;
+  text-align: center;
+  margin-top: 20px;
+}
