@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/Register.css";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -12,8 +13,7 @@ function Register() {
     role: "",
   });
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,16 +40,14 @@ function Register() {
     return "";
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      alert(validationError);
       return;
     }
-
-    setError("");
 
     try {
       const response = await fetch("http://localhost:5000/api/users/create", {
@@ -68,7 +66,7 @@ function Register() {
       });
 
       if (response.ok) {
-        setSuccess("Registration successful!");
+        alert("Registration successful!");
         setFormData({
           name: "",
           lastname: "",
@@ -78,15 +76,27 @@ function Register() {
           email: "",
           role: "",
         });
+        navigate("/login");
       } else {
         const result = await response.json();
-        setError(result.message || "Failed to register.");
+        alert(result.message || "Failed to register.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setError("An unexpected error occurred.");
+      // Check if error.response exists (e.g., from a network error with a response)
+      if (error.response) {
+        try {
+          const result = await error.response.json();
+          alert(result.message || "An unexpected error occurred.");
+        } catch (jsonError) {
+          alert("An unexpected error occurred.");
+        }
+      } else {
+        alert("An unexpected error occurred.");
+      }
     }
   };
+
 
   return (
     <div className="register-container">
@@ -179,8 +189,6 @@ function Register() {
           </select>
         </label>
         <br />
-        {error && <p className="error-message">{error}</p>}
-        {success && <p className="success-message">{success}</p>}
         <button type="submit" className="submit-button">
           Register
         </button>

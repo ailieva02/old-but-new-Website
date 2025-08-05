@@ -5,21 +5,21 @@ import { useAuth } from "./AuthContext";
 
 function NavBar() {
   const [username, setUsername] = useState("Loading...");
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, getUserData } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const userId = sessionStorage.getItem("userId");
-        if (userId) {
-          const userResponse = await fetch(
-            `http://localhost:5000/api/users/${userId}`
+        const { userId, userRole } = getUserData();
+        if (userId && userRole) {
+          const response = await fetch(
+            `http://localhost:5000/api/users/${userId}?currentUserId=${userId}&currentUserRole=${userRole}`
           );
-          if (!userResponse.ok) {
-            throw new Error(`HTTP error! Status: ${userResponse.status}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          const userData = await userResponse.json();
+          const userData = await response.json();
 
           if (userData.data && userData.data.length > 0) {
             setUsername(userData.data[0].username);
@@ -40,7 +40,7 @@ function NavBar() {
     } else {
       setUsername("Loading...");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, getUserData]);
 
   const handleLogout = () => {
     logout();
