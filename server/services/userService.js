@@ -66,8 +66,7 @@ const authenticateUser = async (email, password) => {
 
     if (!result || !result.data || result.data.length === 0) {
       response.status = 401;
-      response.message =
-        "Invalid credentials! check your inputs and try again.";
+      response.message = "Invalid credentials! check your inputs and try again.";
       response.success = false;
 
       reject(response);
@@ -77,8 +76,7 @@ const authenticateUser = async (email, password) => {
 
       if (!isMatch) {
         response.status = 401;
-        response.message =
-          "Invalid credentials! check your inputs and try again.";
+        response.message = "Invalid credentials! check your inputs and try again.";
         response.success = false;
 
         reject(response);
@@ -100,11 +98,37 @@ const authenticateUser = async (email, password) => {
   });
 };
 
-const updateUser = (UserModel) => {
+const updateUser = (UserModel, currentUserId, currentUserRole) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    // Check if password is provided, otherwise don't include it in the update query
+    // Authorization check
+    if (!currentUserId || !currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      return reject(response);
+    }
+
+    if (currentUserRole !== 'admin' && parseInt(currentUserId) !== parseInt(UserModel.id)) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only update your own account';
+      return reject(response);
+    }
+
+    // Check if email is already used by another user
+    const emailCheck = await getUserByEmail(UserModel.email);
+    if (emailCheck && emailCheck.data && emailCheck.data.length > 0) {
+      const existingUser = emailCheck.data[0];
+      if (parseInt(existingUser.id) !== parseInt(UserModel.id)) {
+        response.success = false;
+        response.status = 409;
+        response.message = `Email: ${UserModel.email} is already being used by another user, please choose another!`;
+        return reject(response);
+      }
+    }
+
     let query = `UPDATE User 
                  SET name = ?, lastname = ?, username = ?, email = ?, role = ?
                  WHERE id = ?`;
@@ -117,8 +141,7 @@ const updateUser = (UserModel) => {
       UserModel.id,
     ];
 
-    // Only include the password in the query if it's provided
-    if (UserModel.password) {
+    if (UserModel.password && typeof UserModel.password === 'string' && UserModel.password.trim()) {
       try {
         const hashedPassword = await argon2.hash(UserModel.password);
         query = `UPDATE User 
@@ -142,15 +165,22 @@ const updateUser = (UserModel) => {
 
     connection.query(query, params, (error, results) => {
       if (error) {
-        console.log(error);
+        console.error('Database error:', error);
         response.success = false;
         response.message = `Error querying the database: ${error.message}`;
         return reject(response);
-      } else {
-        response.status = 200;
-        response.success = true;
-        resolve(response);
       }
+
+      if (results.affectedRows === 0) {
+        response.success = false;
+        response.status = 404;
+        response.message = 'User not found';
+        return reject(response);
+      }
+
+      response.status = 200;
+      response.success = true;
+      resolve(response);
     });
   });
 };
@@ -179,55 +209,88 @@ const getAllUsers = () => {
   });
 };
 
-const getUserById = (id) => {
+const getUserById = (userId, currentUserId, currentUserRole) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
+
+    if (!currentUserId || !currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      return reject(response);
+    }
+
+    if (currentUserRole !== 'admin' && currentUserId !== userId) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only access your own data';
+      return reject(response);
+    }
 
     const query = "SELECT * FROM User WHERE id = ?";
 
-    connection.query(query, [id], (error, results) => {
+    connection.query(query, [userId], (error, results) => {
       if (error) {
         response.success = false;
+        response.status = 500;
         response.message = `Error querying the database: ${error}`;
-
-        reject(response);
-      } else {
-        response.status = 200;
-        response.success = true;
-        response.data = results;
-        if (results.length === 0) {
-          response.message = "No user was found!";
-        }
-
-        resolve(response);
+        return reject(response);
       }
+
+      response.status = 200;
+      response.success = true;
+      response.data = results;
+      if (results.length === 0) {
+        response.message = "No user was found!";
+      }
+
+      resolve(response);
     });
   });
 };
 
-const deleteUserById = (id) => {
+const deleteUserById = (userIdToDelete, currentUserId, currentUserRole) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `DELETE FROM User 
-                       WHERE id = ?`;
+    if (!currentUserId || !currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      return reject(response);
+    }
 
-    connection.query(query, [id], (error, results) => {
+    if (currentUserRole !== 'admin' && currentUserId !== userIdToDelete) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only delete your own account';
+      return reject(response);
+    }
+
+    const query = `DELETE FROM User WHERE id = ?`;
+
+    connection.query(query, [userIdToDelete], (error, results) => {
       if (error) {
-        console.log(error);
         response.success = false;
+        response.status = 500;
         response.message = `Error querying the database: ${error}`;
-
-        reject(response);
-      } else {
-        response.status = 200;
-        response.success = true;
-
-        resolve(response);
+        return reject(response);
       }
+
+      if (results.affectedRows === 0) {
+        response.success = false;
+        response.status = 404;
+        response.message = 'User not found';
+        return reject(response);
+      }
+
+      response.status = 200;
+      response.success = true;
+      resolve(response);
     });
   });
 };
+
 
 const getUserByEmail = (email) => {
   return new Promise((resolve, reject) => {

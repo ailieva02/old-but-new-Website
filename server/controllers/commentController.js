@@ -16,6 +16,12 @@ const createComment = async (req, res) => {
   }
 };
 
+// I will add some comments here:
+
+
+// blbalblalblablalbalblablbalbalbla
+
+
 const updateComment = async (req, res) => {
   const commentId = parseInt(req.body.id);
   const commentToUpdate = await commentService.getCommentById(commentId);

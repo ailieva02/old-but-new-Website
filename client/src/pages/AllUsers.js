@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../components/AuthContext.js";
 import { useNavigate } from "react-router-dom";
-import "../styles/AllUsers.css"; // Importing the CSS file
-import UserModal from "../components/UserModal.js"; // Import the UserModal
+import UserModal from "../components/UserModal.js";
+import "../styles/AllUsers.css";
 
 function AllUsers() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // For controlling modal visibility
-  const [selectedUser, setSelectedUser] = useState(null); // To store the selected user data
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { getUserData, logout } = useAuth();
+  const { userId: currentUserId, userRole: currentUserRole } = getUserData();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,98 +23,113 @@ function AllUsers() {
         setUsers(result.data);
       } catch (error) {
         console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false);
+        alert(`Failed to fetch users: ${error.message}`);
       }
     };
 
     fetchUsers();
   }, []);
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this user?");
-    if (!confirmed) return;
+  const handleEdit = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
 
-    try {
-      const response = await fetch("http://localhost:5000/api/users/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+  const handleDelete = async (userId) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        const response = await fetch("http://localhost:5000/api/users/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: userId,
+            currentUserId,
+            currentUserRole,
+          }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+        }
+        setUsers(users.filter((user) => user.id !== userId));
+        if (parseInt(userId) === parseInt(currentUserId)) {
+          logout();
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error(`Error deleting user: ${error.message}`);
+        alert(`Failed to delete user: ${error.message}`);
       }
-
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
-      alert("User deleted successfully.");
-    } catch (error) {
-      console.error("Error deleting user:", error);
     }
   };
 
-  const handleEdit = (user) => {
-    setSelectedUser(user); // Set the selected user data
-    setIsModalOpen(true); // Open the modal
-  };
-
-  const handleOpen = (id) => {
-    navigate(`/users/${id}`);
-  };
-
-  const handleSave = async (updatedUser) => {
+ const handleSaveUser = async (updatedUser) => {
     try {
       const response = await fetch("http://localhost:5000/api/users/update", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedUser),
+        method: "PUT", // Changed from POST to PUT
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: updatedUser.id,
+          name: updatedUser.name,
+          lastname: updatedUser.lastname,
+          username: updatedUser.username,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          password: updatedUser.newPassword && updatedUser.newPassword.trim() ? updatedUser.newPassword : undefined,
+          currentUserId,
+          currentUserRole,
+        }),
       });
-
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
       }
-
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === updatedUser.id ? { ...user, ...updatedUser } : user
-        )
-      );
-      alert("User updated successfully.");
-      setIsModalOpen(false); // Close the modal after saving
+      setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
+      setIsModalOpen(false);
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error(`Error updating user: ${error.message}`);
+      alert(`Failed to update user: ${error.message}`);
     }
   };
 
   return (
-    <div className="all-users-container">
-      <h1 className="all-users-title">All Users</h1>
-      {loading ? (
-        <p className="loading-message">Loading...</p>
-      ) : users.length > 0 ? (
+    <div>
+      <h1>All Users</h1>
+      {users.length > 0 ? (
         <table className="users-table">
           <thead>
             <tr>
               <th>Name</th>
+              <th>Last Name</th>
               <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>
-                  {user.name} {user.lastname}
-                </td>
+                <td>{user.name}</td>
+                <td>{user.lastname}</td>
                 <td>{user.username}</td>
+                <td>{user.email}</td>
+                <td>{user.role}</td>
                 <td>
-                  <button className="btn open-btn" onClick={() => handleOpen(user.id)}>
-                    Open
-                  </button>
-                  <button className="btn edit-btn" onClick={() => handleEdit(user)}>
+                  <button
+                    className="edit-button"
+                    onClick={() => handleEdit(user)}
+                  >
                     Edit
                   </button>
-                  <button className="btn delete-btn" onClick={() => handleDelete(user.id)}>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(user.id)}
+                  >
                     Delete
                   </button>
                 </td>
@@ -121,16 +138,14 @@ function AllUsers() {
           </tbody>
         </table>
       ) : (
-        <p className="no-users-message">No users found.</p>
+        <p>Loading...</p>
       )}
-
-      {/* Render UserModal when isModalOpen is true */}
-      {isModalOpen && (
+      {selectedUser && (
         <UserModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)} // Close the modal
-          onSave={handleSave} // Pass the save function to modal
-          initialUser={selectedUser} // Pass the selected user data
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveUser}
+          initialUser={selectedUser}
         />
       )}
     </div>

@@ -70,7 +70,6 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
         const foundRating = ratingsWithUsernames.find(
           (rating) => rating.user_id === parseInt(userId)
         );
-
         setUserRating(foundRating ? foundRating.stars : null);
       } else {
         setRatings([]);

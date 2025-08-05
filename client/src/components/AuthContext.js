@@ -29,8 +29,15 @@ export const AuthProvider = ({ children }) => {
     updateAuthState();
   };
 
+  const getUserData = () => {
+    return {
+      userId: sessionStorage.getItem("userId"),
+      userRole: sessionStorage.getItem("userRole"),
+    };
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isAdmin, login, logout, getUserData }}>
       {children}
     </AuthContext.Provider>
   );
