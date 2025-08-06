@@ -123,6 +123,7 @@ function Categories() {
               title={category.title}
               createdAt={category.created_at}
               userId={category.user_id}
+              username={category.username}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onEnter={handleEnter}

@@ -2,6 +2,7 @@ const connection = require("../dbConn");
 const ResponseModel = require("../models/responseModel");
 const CategoryModel = require("../models/categoryModel");
 const { response } = require("express");
+const userService = require("./userService"); 
 
 const deleteCategoryByCategoryId = (id) => {
   return new Promise(async (resolve, reject) => {
@@ -136,23 +137,42 @@ const getAllCategories = () => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    connection.query("SELECT * FROM category", (error, results) => {
+    connection.query("SELECT * FROM category", (error, resultsCategories) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
-
         reject(response);
-      } else {
+        return;
+      }
+
+      connection.query("SELECT id, username FROM User", (error, resultsUsers) => {
+        if (error) {
+          response.success = false;
+          response.message = `Error querying the database: ${error}`;
+          reject(response);
+          return;
+        }
+
+        // Create a new array to avoid mutating the original results
+        const enrichedCategories = [];
+        for (const category of resultsCategories) {
+          const user = resultsUsers.find(item => String(item.id) === String(category.user_id));
+          enrichedCategories.push({
+            ...category,
+            username: user ? user.username : "Unknown User"
+          });
+        }
+
         response.status = 200;
         response.success = true;
-        response.data = results;
+        response.data = enrichedCategories;
 
-        if (results.length === 0) {
+        if (enrichedCategories.length === 0) {
           response.message = "No categories were found!";
         }
 
         resolve(response);
-      }
+      });
     });
   }).catch((error) => {
     if (error instanceof ResponseModel) {

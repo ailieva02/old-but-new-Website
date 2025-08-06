@@ -7,50 +7,53 @@ function CategoryCard({
   id,
   title = "Untitled",
   createdAt = "Unknown",
+  username = "Unknown",
   userId = null,
   onEdit,
   onDelete,
   onEnter,
 }) {
-  const [username, setUsername] = useState("Loading...");
-  const { isAdmin } = useAuth();
-  const sessionUserId = parseInt(sessionStorage.getItem("userId"), 10);
+
   const [canEditOrDelete, setCanEditOrDelete] = useState(false);
+  const { isAdmin, getUserData } = useAuth();
+  const { userId: currentUserId, userRole, username: currentUsername } = getUserData();
   const navigate = useNavigate();
 
+
+  
   useEffect(() => {
     const fetchUsername = async () => {
       try {
         if (userId && userId !== "Unknown") {
+          // If userId matches current user, use stored username
+          if (parseInt(userId, 10) === parseInt(currentUserId, 10) && currentUsername) {
+            setCanEditOrDelete(isAdmin || parseInt(userId, 10) === parseInt(currentUserId, 10));
+            return;
+          }
+
           const response = await fetch(
-            `http://localhost:5000/api/users/${userId}`
+            `http://localhost:5000/api/users/${userId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
           );
           if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+              errorData.message || `HTTP error! Status: ${response.status}`
+            );
           }
           const result = await response.json();
           const fetchedUserId = parseInt(result.data[0]?.id, 10);
 
           if (Array.isArray(result.data) && result.data.length > 0) {
-            setUsername(result.data[0]?.username || "Unknown User");
-
-            if (isAdmin || sessionUserId === fetchedUserId) {
-              setCanEditOrDelete(true);
-            }
-          } else {
-            setUsername("Unknown User");
-          }
-        } else {
-          setUsername("Unknown User");
+            setCanEditOrDelete(isAdmin || parseInt(currentUserId, 10) === fetchedUserId);
+          } 
         }
       } catch (error) {
-        console.error(`Error fetching username: ${error.message}`);
-        setUsername("Unknown User");
+        console.error("Error fetching username:", error.message, error);
       }
     };
 
     fetchUsername();
-  }, [userId, isAdmin, sessionUserId]);
+  }, [userId, isAdmin, currentUserId, currentUsername, userRole]);
 
   const handleEnter = () => {
     navigate(`/category/${id}`);
