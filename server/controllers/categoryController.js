@@ -21,6 +21,8 @@ const updateCategory = async (req, res) => {
 
   categoryToUpdate.id = categoryId;
   categoryToUpdate.title = req.body.title;
+  categoryToUpdate.currentUserRole = req.body.currentUserRole;
+  categoryToUpdate.currentUserId = req.body.currentUserId;
 
   const result = await categoryService.updateCategory(categoryToUpdate);
   if (result) {
@@ -32,7 +34,9 @@ const updateCategory = async (req, res) => {
 
 const deleteCategoryByCategoryId = async (req, res) => {
   const categoryId = parseInt(req.body.id);
-  const result = await categoryService.deleteCategoryByCategoryId(categoryId);
+  const currentUserId = parseInt(req.body.currentUserId);
+  const currentUserRole = req.body.currentUserRole;
+  const result = await categoryService.deleteCategoryByCategoryId(categoryId, currentUserId, currentUserRole);
 
   if (result) {
     res.status(result.status).json(result);

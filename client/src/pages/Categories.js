@@ -55,7 +55,11 @@ function Categories() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ id }),
+            body: JSON.stringify({ 
+              id,
+              currentUserId: sessionStorage.getItem("userId"),
+              currentUserRole: sessionStorage.getItem("userRole")
+             }),
           }
         );
         if (!response.ok) {
@@ -84,7 +88,8 @@ function Categories() {
             ...(modalType === "edit" && { id: selectedCategory }),
             created_at:
               modalType === "create" ? new Date().toISOString() : undefined,
-            user_id: sessionStorage.getItem("userId"),
+            currentUserId: sessionStorage.getItem("userId"),
+            currentUserRole: sessionStorage.getItem("userRole")
           }),
         }
       );

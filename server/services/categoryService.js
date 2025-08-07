@@ -4,9 +4,26 @@ const CategoryModel = require("../models/categoryModel");
 const { response } = require("express");
 const userService = require("./userService"); 
 
-const deleteCategoryByCategoryId = (id) => {
+const deleteCategoryByCategoryId = (id, currentUserId, currentUserRole) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
+
+    // Authorization check
+    if (!currentUserId || !currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      return reject(response);
+    }
+
+    const category = await getCategoryById(id);
+
+    if (currentUserRole !== 'admin' && parseInt(currentUserId) !== parseInt(category.data[0].user_id)) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only update your own account';
+      return reject(response);
+    }
 
     const query = `DELETE FROM Category 
                        WHERE id = ?`;
@@ -40,6 +57,21 @@ const deleteCategoryByCategoryId = (id) => {
 const updateCategory = (CategoryModel) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
+
+    // Authorization check
+    if (!CategoryModel.currentUserId || !CategoryModel.currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      return reject(response);
+    }
+
+    if (CategoryModel.currentUserRole !== 'admin' && parseInt(CategoryModel.currentUserId) !== parseInt(CategoryModel.data[0].user_id)) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only update your own account';
+      return reject(response);
+    }
 
     const query = `UPDATE Category 
                         SET title = ?

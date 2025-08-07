@@ -2,13 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PostCard from "../components/PostCard";
 import CategoryModal from "../components/CategoryModal";
+import { useAuth } from "../components/AuthContext.js";
 import "../styles/SingleCategory.css";
 
 function SingleCategory() {
-  const { id } = useParams();
+  const { id } = useParams(); // category id
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [canEditOrDelete, setCanEditOrDelete] = useState(false);
+  const { isAdmin, getUserData } = useAuth();
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,43 +40,69 @@ function SingleCategory() {
       }
     };
 
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/users`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const result = await response.json();
-        setUsers(result.data || []);
-        console.log("Users fetched successfully:", result.data);
-      } catch (error) {
-        setError(`Error fetching users: ${error.message}`);
-        console.error(error);
-      }
-    };
+
 
     const fetchCategory = async () => {
+          try {
+            const response = await fetch(
+              `http://localhost:5000/api/categories/${id}`
+            );
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const result = await response.json();
+            setCategory(result.data || null);
+            console.log("Category fetched successfully:", result.data);
+            return result.data;
+          } catch (error) {
+            setError(`Error fetching category: ${error.message}`);
+            console.error(error);
+          }
+        };
+
+
+
+     const fetchUsername = async (categoryData) => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/categories/${id}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        const {userId: currentUserId, userRole}  = getUserData();
+
+        if (currentUserId && currentUserId !== "Unknown") {
+          // If userId matches current user, use stored username
+          if (parseInt(categoryData[0].user_id) === parseInt(currentUserId)) {
+            setCanEditOrDelete(isAdmin || parseInt(categoryData[0].user_id) === parseInt(currentUserId, 10));
+            return;
+          }
+          const categoryUserId = categoryData[0].user_id;
+          const response = await fetch(
+            `http://localhost:5000/api/users/${categoryUserId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
+          );
+
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+              errorData.message || `HTTP error! Status: ${response.status}`
+            );
+          }
+          const result = await response.json();
+          const fetchedUserId = parseInt(result.data[0]?.id, 10);
+
+
+          if (Array.isArray(result.data) && result.data.length > 0) {
+            setCanEditOrDelete(isAdmin || parseInt(currentUserId, 10) === fetchedUserId);
+          } 
         }
-        const result = await response.json();
-        setCategory(result.data || null);
-        console.log("Category fetched successfully:", result.data);
       } catch (error) {
-        setError(`Error fetching category: ${error.message}`);
-        console.error(error);
+        console.error("Error fetching username:", error.message, error);
       }
     };
 
-    // Fetch data when the component mounts
+
+       // Fetch data when the component mounts
     const fetchData = async () => {
       await fetchAllPosts();
-      await fetchUsers();
-      await fetchCategory();
+      const categoryData = await fetchCategory();
+      await fetchUsername(categoryData);
       setLoading(false);
     };
 
@@ -91,6 +120,7 @@ function SingleCategory() {
 
   const handleDeleteCategory = async () => {
     if (window.confirm("Are you sure you want to delete this category?")) {
+      const { userId: currentUserId, userRole } = getUserData();
       try {
         const response = await fetch(
           `http://localhost:5000/api/categories/delete`,
@@ -99,7 +129,11 @@ function SingleCategory() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ id: parseInt(id) }),
+            body: JSON.stringify({
+               id: parseInt(id),
+               currentUserId: currentUserId,
+               currentUserRole: userRole,
+             }),
           }
         );
         if (!response.ok) {
@@ -114,7 +148,7 @@ function SingleCategory() {
   };
 
   const handleOpenModal = () => {
-    setModalTitle(category ? category.title : "");
+    setModalTitle(category ? category[0].title : "");
     setIsModalOpen(true);
   };
 
@@ -123,29 +157,42 @@ function SingleCategory() {
   };
 
   const handleSaveCategory = async (updatedCategory) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/categories/update`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: parseInt(id),
-            title: updatedCategory.title,
-          }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      window.location.reload();
-    } catch (error) {
-      setError(`Error updating category: ${error.message}`);
-      console.error(error);
+  try {
+    const { userId: currentUserId, userRole } = getUserData();
+    if (!currentUserId || !userRole) {
+      throw new Error("Current user ID or role is missing");
     }
-  };
+
+    const response = await fetch(
+      `http://localhost:5000/api/categories/update`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: parseInt(id),
+          title: updatedCategory.title,
+          user_id: updatedCategory.user_id,
+          currentUserId: parseInt(currentUserId),
+          currentUserRole: userRole
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `HTTP error! Status: ${response.status}`
+      );
+    }
+
+    navigate("/categories");
+  } catch (error) {
+    setError(`Error updating category: ${error.message}`);
+    console.error(error);
+  }
+};
 
   if (loading) {
     return <p>Loading posts...</p>;
@@ -159,15 +206,19 @@ function SingleCategory() {
     <div className="single-category-container">
       <h1>Posts in Category {category ? category[0].title : "Loading..."}</h1>
       <div className="category-actions">
-        <button className="update-category-button" onClick={handleOpenModal}>
-          Edit
-        </button>
-        <button
-          className="delete-category-button"
-          onClick={handleDeleteCategory}
-        >
-          Delete
-        </button>
+        {canEditOrDelete && (
+          <>
+            <button className="update-category-button" onClick={handleOpenModal}>
+              Edit
+            </button>
+            <button
+              className="delete-category-button"
+              onClick={handleDeleteCategory}
+            >
+              Delete
+            </button>
+         </>
+        )}
       </div>
       <div className="post-container">
         {posts.length > 0 ? (
