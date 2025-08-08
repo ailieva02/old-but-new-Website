@@ -90,7 +90,7 @@ function Home() {
 
       <button
         className="add-post-button"
-        onClick={() => navigate("/add-edit-post")}
+        onClick={() => navigate("/add-post")}
       >
         Add Post
       </button>
