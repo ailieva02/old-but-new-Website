@@ -1,29 +1,45 @@
 import React, { useState, useEffect } from "react";
 import UserModal from "../components/UserModal.js";
+import { useAuth } from "../components/AuthContext";
 import "../styles/UserAccount.css";
+// import { getUser } from "../../../server/controllers/userController.js";
 
-const getCurrentUserId = async () => {
-  const userId = sessionStorage.getItem("userId");
-  return parseInt(userId, 10);
-};
+
+// const getCurrentUserDataAndRole = async () => {
+//   const userId = sessionStorage.getItem("userId");
+//   const userRole = sessionStorage.getItem("userRole");
+//   return {parseInt(userId, 10), userRole} 
+// };
 
 function UserAccount() {
+  const {getUserData}= useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
 
-  const fetchUserIdAndData = async () => {
+  const fetchUserData = async () => {
     try {
-      const userId = await getCurrentUserId();
-      if (!userId) {
+      const {userId: currentUserId, userRole: currentUserRole} = getUserData();
+      if (!currentUserId) {
         throw new Error("User ID is not available");
       }
 
+      if (!currentUserRole) {
+        throw new Error("User Role is not available");
+      }
+
       const userResponse = await fetch(
-        `http://localhost:5000/api/users/${userId}`
-      );
+          `http://localhost:5000/api/users/${parseInt(currentUserId)}?currentUserId=${parseInt(currentUserId)}&currentUserRole=${currentUserRole}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
       if (!userResponse.ok) {
         throw new Error(`HTTP error! Status: ${userResponse.status}`);
       }
@@ -42,7 +58,7 @@ function UserAccount() {
   };
 
   useEffect(() => {
-    fetchUserIdAndData();
+    fetchUserData();
   }, []);
 
   const handleEdit = () => {
@@ -53,13 +69,17 @@ function UserAccount() {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete your account?")) {
       try {
-        const userId = await getCurrentUserId();
+        const {userId, userRole} = getUserData();
         const response = await fetch(`http://localhost:5000/api/users/delete`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id: userId }),
+          body: JSON.stringify({
+            id: userId,
+            currentUserId: userId, 
+            currentUserRole: userRole
+          }),
         });
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -74,7 +94,8 @@ function UserAccount() {
 
   const handleSaveUser = async (updatedUser) => {
     try {
-      const userId = await getCurrentUserId();
+      
+      const {userId, userRole} = getUserData();
       const response = await fetch(`http://localhost:5000/api/users/update`, {
         method: "PUT",
         headers: {
@@ -87,13 +108,15 @@ function UserAccount() {
           username: updatedUser.username,
           email: updatedUser.email,
           role: updatedUser.role,
+          currentUserRole: userRole,
+          currentUserId: userId
         }),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       // Refetch user data after updating
-      await fetchUserIdAndData();
+      await fetchUserData();
       setIsModalOpen(false);
     } catch (error) {
       setError(`Error updating user: ${error.message}`);
