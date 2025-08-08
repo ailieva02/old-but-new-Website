@@ -66,7 +66,7 @@ function NavBar() {
               <Link to="/user-account">User Account</Link>
             </li>
             <li>
-              <Link to="/add-edit-post">Add/Edit Post</Link>
+              <Link to="/add-post">Add Post</Link>
             </li>
             <li>
               <Link to="/categories">Categories</Link>

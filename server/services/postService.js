@@ -5,93 +5,89 @@ const userService = require("../services/userService");
 const categoryService = require("../services/categoryService");
 const { response } = require("express");
 
-const createPost = (PostModel) => {
+const createPost = (postModel, currentUserId, currentUserRole) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    const existingUserResult = await userService.getUserById(PostModel.user_id);
-    if (
-      existingUserResult &&
-      existingUserResult.data &&
-      existingUserResult.data.length > 0
-    ) {
-      const existingCategoryResult = await categoryService.getCategoryById(
-        PostModel.category_id
-      );
-      if (
-        existingCategoryResult &&
-        existingCategoryResult.data &&
-        existingCategoryResult.data.length > 0
-      ) {
-        const existingPostResult = await getPostByCategoryIdAndTitle(
-          PostModel.category_id,
-          PostModel.title
-        );
-        if (existingPostResult) {
-          if (existingPostResult.data && existingPostResult.data.length > 0) {
-            response.message = `The Title: ${PostModel.title} is already being used for this category, please choose another!`;
-            response.status = 409;
-            response.success = false;
-
-            reject(response);
-          } else {
-            const query = `INSERT INTO Post (category_id, user_id, title, body, image, created_at) 
-                                        VALUES(?, ?, ?, ?, ?, ?)`;
-
-            const dateTimeNow = new Date();
-            const formattedDateTimeNow = dateTimeNow
-              .toISOString()
-              .slice(0, 19)
-              .replace("T", " ");
-
-            connection.query(
-              query,
-              [
-                PostModel.category_id,
-                PostModel.user_id,
-                PostModel.title,
-                PostModel.body,
-                PostModel.image,
-                formattedDateTimeNow,
-              ],
-              (error, results) => {
-                if (error) {
-                  response.success = false;
-                  response.message = `Error querying the database: ${error}`;
-
-                  reject(response);
-                } else {
-                  response.status = 200;
-                  response.success = true;
-
-                  resolve(response);
-                }
-              }
-            );
-          }
-        }
-      } else {
-        response.message = `No category was found for this category id: ${PostModel.category_id}!`;
-        response.status = 409;
-        response.success = false;
-
-        reject(response);
-      }
-    } else {
-      response.message = `No user was found for this user id: ${PostModel.user_id}!`;
-      response.status = 409;
+    // Validate authorization
+    if (!currentUserId || !currentUserRole) {
       response.success = false;
-
-      reject(response);
+      response.status = 400;
+      response.message = "Current user data is required";
+      return reject(response);
     }
-  }).catch((error) => {
-    if (error instanceof ResponseModel) {
-      return error;
-    } else {
-      const response = new ResponseModel();
-      response.message = error;
+
+    // Restrict to own user_id or admin
+    if (currentUserRole !== "admin" && currentUserId !== postModel.user_id) {
       response.success = false;
-      return response;
+      response.status = 403;
+      response.message = "Unauthorized: You can only create posts for yourself";
+      return reject(response);
+    }
+
+    try {
+      // Validate user existence
+      const existingUserResult = await userService.getUserById(postModel.user_id, currentUserId, currentUserRole);
+      if (!existingUserResult.success || !existingUserResult.data || existingUserResult.data.length === 0) {
+        response.success = false;
+        response.status = 404;
+        response.message = `No user was found for this user id: ${postModel.user_id}`;
+        return reject(response);
+      }
+
+      // Validate category existence
+      const existingCategoryResult = await categoryService.getCategoryById(postModel.category_id);
+      if (!existingCategoryResult.success || !existingCategoryResult.data || existingCategoryResult.data.length === 0) {
+        response.success = false;
+        response.status = 404;
+        response.message = `No category was found for this category id: ${postModel.category_id}`;
+        return reject(response);
+      }
+
+      // Check for duplicate post title in category
+      const existingPostResult = await getPostByCategoryIdAndTitle(postModel.category_id, postModel.title);
+      if (existingPostResult.success && existingPostResult.data && existingPostResult.data.length > 0) {
+        response.success = false;
+        response.status = 409;
+        response.message = `The Title: ${postModel.title} is already being used for this category, please choose another!`;
+        return reject(response);
+      }
+
+      // Insert post
+      const query = `
+        INSERT INTO Post (category_id, user_id, title, body, image, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+      const dateTimeNow = new Date().toISOString().slice(0, 19).replace("T", " ");
+      const values = [
+        postModel.category_id,
+        postModel.user_id,
+        postModel.title,
+        postModel.body,
+        postModel.image ? `/uploads/${postModel.image}` : null,
+        dateTimeNow,
+      ];
+
+      connection.query(query, values, (error, results) => {
+        if (error) {
+          response.success = false;
+          response.status = 500;
+          response.message = `Error creating post: ${error.message}`;
+          return reject(response);
+        }
+
+        response.status = 201;
+        response.success = true;
+        response.message = "Post created successfully";
+        response.data = { id: results.insertId };
+        resolve(response);
+      });
+    } catch (error) {
+      console.error('Service - Error:', error.stack);
+      response.success = false;
+      response.status = error.status || 500;
+      response.message = error.message || "Internal server error";
+      reject(response);
     }
   });
 };

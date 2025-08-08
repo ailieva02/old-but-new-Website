@@ -12,7 +12,7 @@ import SingleCategory from "./pages/SingleCategory.js";
 import NavBar from "./components/NavBar.js";
 import { AuthProvider } from "./components/AuthContext.js";
 import ProtectedRoute from "./components/ProtectedRoute.js";
-import AddEditPost from "./pages/AddEditPost.js";
+import AddPost from "./pages/AddPost.js";
 import SpecificUserDetail from "./pages/SpecificUserDetails.js";
 
 function App() {
@@ -35,8 +35,8 @@ function App() {
               element={<ProtectedRoute element={<SinglePost />} />}
             />
             <Route
-              path="/add-edit-post"
-              element={<ProtectedRoute element={<AddEditPost />} />}
+              path="/add-post"
+              element={<ProtectedRoute element={<AddPost />} />}
             />
             <Route
               path="/edit-post/:id"

@@ -2,17 +2,9 @@ import React, { useState, useEffect } from "react";
 import UserModal from "../components/UserModal.js";
 import { useAuth } from "../components/AuthContext";
 import "../styles/UserAccount.css";
-// import { getUser } from "../../../server/controllers/userController.js";
-
-
-// const getCurrentUserDataAndRole = async () => {
-//   const userId = sessionStorage.getItem("userId");
-//   const userRole = sessionStorage.getItem("userRole");
-//   return {parseInt(userId, 10), userRole} 
-// };
 
 function UserAccount() {
-  const {getUserData}= useAuth();
+  const {getUserData} = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

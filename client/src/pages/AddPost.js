@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../components/AuthContext"
 import "../styles/AddEditPost.css";
 
-function AddEditPost() {
+function AddPost() {
   const [title, setTitle] = useState("");
+  const {getUserData} = useAuth();
   const [body, setBody] = useState("");
   const [image, setImage] = useState(null);
   const [category, setCategory] = useState("");
@@ -34,6 +36,9 @@ function AddEditPost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+
+    const {userId: currentUserId, userRole: currentUserRole} = getUserData();
+
     const formData = new FormData();
     formData.append("category_id", category);
     formData.append("title", title);
@@ -41,13 +46,14 @@ function AddEditPost() {
     if (image) {
       formData.append("image", image);
     }
-    formData.append("user_id", sessionStorage.getItem("userId"));
+    formData.append("currentUserId", currentUserId);
+    formData.append("currentUserRole", currentUserRole);
 
     try {
       const response = await fetch("http://localhost:5000/api/posts/create", {
         method: "POST",
-        body: formData,
-      });
+        body: formData
+        });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -116,4 +122,4 @@ function AddEditPost() {
   );
 }
 
-export default AddEditPost;
+export default AddPost;

@@ -3,24 +3,34 @@ const postService = require("../services/postService");
 
 const createPost = async (req, res) => {
   try {
-    const { category_id, user_id, title, body } = req.body;
-    const image = req.file ? req.file.filename : "default.png";
+    const { category_id, title, body, currentUserId, currentUserRole } = req.body;
+    const image = req.file;
+
+    // Validate required fields
+    if (!category_id || !title || !body || !currentUserId || !currentUserRole) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: 'Missing required fields: category_id, title, body, currentUserId, or currentUserRole',
+      });
+    }
 
     const postModel = {
       category_id,
-      user_id,
       title,
       body,
-      image,
+      user_id: currentUserId, // Use currentUserId as user_id
+      image: image ? image.filename : null,
     };
 
-    const response = await postService.createPost(postModel);
-    res.status(response.status).json(response);
+    const result = await postService.createPost(postModel, currentUserId, currentUserRole);
+    res.status(result.status).json(result);
   } catch (error) {
-    res.status(500).json({
+    console.error('Error in createPost:', error.stack);
+    res.status(error.status || 500).json({
       success: false,
-      message: "Error creating the post",
-      error: error.message,
+      status: error.status || 500,
+      message: error.message || 'Internal server error',
     });
   }
 };
