@@ -64,7 +64,7 @@ const createPost = (postModel, currentUserId, currentUserRole) => {
         postModel.user_id,
         postModel.title,
         postModel.body,
-        postModel.image ? `/uploads/${postModel.image}` : null,
+        postModel.image ? `${postModel.image}` : null,
         dateTimeNow,
       ];
 
