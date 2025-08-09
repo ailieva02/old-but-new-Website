@@ -14,7 +14,7 @@ function Home() {
   // Fetch posts from the API
   const fetchPosts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/posts");
+      const response = await fetch(`${process.env.REACT_APP_API}/api/posts`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -28,7 +28,7 @@ function Home() {
   // Fetch categories from the API
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/categories");
+      const response = await fetch(`${process.env.REACT_APP_API}/api/categories`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -42,7 +42,7 @@ function Home() {
   // Fetch users from the API
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/users");
+      const response = await fetch(`${process.env.REACT_APP_API}/api/users`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }

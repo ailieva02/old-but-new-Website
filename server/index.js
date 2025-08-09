@@ -11,7 +11,7 @@ console.log("DB_PASS:", process.env.DB_PASS);
 console.log("DB_DATABASE:", process.env.DB_DATABASE);
 
 const app = express();
-const port = 5000;
+const port = 5000; // Change here
 
 app.use(cors());
 app.use(express.json());
@@ -31,5 +31,5 @@ app.use('/api', ratingRoutes);
 dotenv.config();
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on ${process.env.REACT_APP_API}`);
 });

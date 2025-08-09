@@ -14,7 +14,7 @@ function EditPost() {
     // Fetch categories for the dropdown
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/categories");
+        const response = await fetch(`${process.env.REACT_APP_API}/api/categories`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -28,7 +28,7 @@ function EditPost() {
     // Fetch post data for editing
     const fetchPost = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/posts/${id}`);
+        const response = await fetch(`${process.env.REACT_APP_API}/api/posts/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -58,7 +58,7 @@ function EditPost() {
     };
   
     try {
-      const response = await fetch("http://localhost:5000/api/posts/update", {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/posts/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

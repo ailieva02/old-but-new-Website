@@ -11,7 +11,7 @@ function CommentsSection({ postId }) {
   const fetchComments = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/comments-by-post-id?postId=${postId}`
+        `${process.env.REACT_APP_API}/api/comments-by-post-id?postId=${postId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch comments");
@@ -22,7 +22,7 @@ function CommentsSection({ postId }) {
         const commentsWithUsernames = await Promise.all(
           data.data.map(async (comment) => {
             const userResponse = await fetch(
-              `http://localhost:5000/api/users/${comment.user_id}`
+              `${process.env.REACT_APP_API}/api/users/${comment.user_id}`
             );
             const userData = await userResponse.json();
             return {
@@ -52,7 +52,7 @@ function CommentsSection({ postId }) {
   const handleAddComment = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/comments/create",
+        `${process.env.REACT_APP_API}/api/comments/create`,
         {
           method: "POST",
           headers: {
@@ -80,7 +80,7 @@ function CommentsSection({ postId }) {
   const handleEditComment = async (commentId) => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/comments/update",
+        `${process.env.REACT_APP_API}/api/comments/update`,
         {
           method: "POST",
           headers: {
@@ -108,7 +108,7 @@ function CommentsSection({ postId }) {
   const handleDeleteComment = async (commentId) => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/comments/delete",
+        `${process.env.REACT_APP_API}/api/comments/delete`,
         {
           method: "POST",
           headers: {

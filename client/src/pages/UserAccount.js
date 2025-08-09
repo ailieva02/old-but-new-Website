@@ -22,8 +22,9 @@ function UserAccount() {
         throw new Error("User Role is not available");
       }
 
+      console.log("React apito: ", process.env.REACT_APP_API);
       const userResponse = await fetch(
-          `http://localhost:5000/api/users/${parseInt(currentUserId)}?currentUserId=${parseInt(currentUserId)}&currentUserRole=${currentUserRole}`,
+          `${process.env.REACT_APP_API}/api/users/${parseInt(currentUserId)}?currentUserId=${parseInt(currentUserId)}&currentUserRole=${currentUserRole}`,
           {
             method: "GET",
             headers: {
@@ -62,7 +63,7 @@ function UserAccount() {
     if (window.confirm("Are you sure you want to delete your account?")) {
       try {
         const {userId, userRole} = getUserData();
-        const response = await fetch(`http://localhost:5000/api/users/delete`, {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/users/delete`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -88,7 +89,7 @@ function UserAccount() {
     try {
       
       const {userId, userRole} = getUserData();
-      const response = await fetch(`http://localhost:5000/api/users/update`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/users/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

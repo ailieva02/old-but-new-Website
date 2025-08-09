@@ -11,7 +11,7 @@ function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/categories");
+      const response = await fetch(`${process.env.REACT_APP_API}/api/categories`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -29,7 +29,7 @@ function Categories() {
   const handleEnter = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/categories/${id}`
+        `${process.env.REACT_APP_API}/api/categories/${id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -49,7 +49,7 @@ function Categories() {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/categories/delete`,
+          `${process.env.REACT_APP_API}/api/categories/delete`,
           {
             method: "POST",
             headers: {
@@ -75,7 +75,7 @@ function Categories() {
   const handleSave = async (category) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/categories/${
+        `${process.env.REACT_APP_API}/api/categories/${
           modalType === "edit" ? "update" : "create"
         }`,
         {

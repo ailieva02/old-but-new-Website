@@ -67,6 +67,14 @@ const deletePostById = async (req, res) => {
   const postId = parseInt(req.body.id);
   const result = await postService.deletePostById(postId);
 
+  // console.log("This is the postID:", postId);
+
+  // console.log("This is the request: ", req);
+
+  // console.log("This is the request body: ",  req)
+
+
+
   if (result) {
     res.status(result.status).json(result);
   } else {

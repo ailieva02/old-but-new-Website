@@ -14,7 +14,7 @@ function NavBar() {
         const { userId, userRole } = getUserData();
         if (userId && userRole) {
           const response = await fetch(
-            `http://localhost:5000/api/users/${userId}?currentUserId=${userId}&currentUserRole=${userRole}`
+            `${process.env.REACT_APP_API}/api/users/${userId}?currentUserId=${userId}&currentUserRole=${userRole}`
           );
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);

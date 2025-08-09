@@ -24,7 +24,7 @@ function SinglePost() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/posts/${id}`);
+        const response = await fetch(`${process.env.REACT_APP_API}/api/posts/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch the post data");
         }
@@ -40,7 +40,7 @@ function SinglePost() {
     const fetchAverageRating = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/ratings-average-by-post-id?post_id=${id}`
+          `${process.env.REACT_APP_API}/api/ratings-average-by-post-id?post_id=${id}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch the average rating");
@@ -58,7 +58,7 @@ function SinglePost() {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/posts/delete", {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/posts/delete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

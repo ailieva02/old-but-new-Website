@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext"
 import "../styles/AddEditPost.css";
 
+
 function AddPost() {
   const [title, setTitle] = useState("");
   const {getUserData} = useAuth();
@@ -15,7 +16,7 @@ function AddPost() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/categories");
+        const response = await fetch(`${process.env.REACT_APP_API}/api/categories`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -50,7 +51,7 @@ function AddPost() {
     formData.append("currentUserRole", currentUserRole);
 
     try {
-      const response = await fetch("http://localhost:5000/api/posts/create", {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/posts/create`, {
         method: "POST",
         body: formData
         });

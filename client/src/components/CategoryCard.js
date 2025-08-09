@@ -32,7 +32,7 @@ function CategoryCard({
           }
 
           const response = await fetch(
-            `http://localhost:5000/api/users/${userId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
+            `${process.env.REACT_APP_API}/api/users/${userId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
           );
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));

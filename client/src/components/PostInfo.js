@@ -18,10 +18,10 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
     try {
       const [userResponse, categoryResponse, ratingsResponse] =
         await Promise.all([
-          fetch(`http://localhost:5000/api/users/${post.user_id}`),
-          fetch(`http://localhost:5000/api/categories/${post.category_id}`),
+          fetch(`${process.env.REACT_APP_API}/api/users/${post.user_id}`),
+          fetch(`${process.env.REACT_APP_API}/api/categories/${post.category_id}`),
           fetch(
-            `http://localhost:5000/api/ratings-by-post-id?post_id=${post.id}`
+            `${process.env.REACT_APP_API}/api/ratings-by-post-id?post_id=${post.id}`
           ),
         ]);
 
@@ -51,7 +51,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
         const ratingsWithUsernames = await Promise.all(
           ratingsData.data.map(async (rating) => {
             const userResponse = await fetch(
-              `http://localhost:5000/api/users/${rating.user_id}`
+              `${process.env.REACT_APP_API}/api/users/${rating.user_id}`
             );
             const userData = await userResponse.json();
             return {
@@ -101,7 +101,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
       });
 
       const response = await fetch(
-        `http://localhost:5000/api/ratings/${endpoint}`,
+        `${process.env.REACT_APP_API}/api/ratings/${endpoint}`,
         {
           method,
           headers: { "Content-Type": "application/json" },
@@ -123,7 +123,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
   const deleteRating = async (ratingId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/ratings/delete`,
+        `${process.env.REACT_APP_API}/api/ratings/delete`,
         {
           method: "DELETE",
           headers: {

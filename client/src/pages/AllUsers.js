@@ -15,7 +15,7 @@ function AllUsers() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/users");
+        const response = await fetch(`${process.env.REACT_APP_API}/api/users`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -38,7 +38,7 @@ function AllUsers() {
   const handleDelete = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const response = await fetch("http://localhost:5000/api/users/delete", {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/users/delete`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -67,7 +67,7 @@ function AllUsers() {
 
  const handleSaveUser = async (updatedUser) => {
     try {
-      const response = await fetch("http://localhost:5000/api/users/update", {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/users/update`, {
         method: "PUT", // Changed from POST to PUT
         headers: {
           "Content-Type": "application/json",

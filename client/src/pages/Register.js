@@ -50,7 +50,7 @@ const handleSubmit = async (e) => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/users/create", {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/users/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

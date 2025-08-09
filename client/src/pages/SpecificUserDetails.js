@@ -14,7 +14,7 @@ const SpecificUserDetail = () => {
   const fetchUserData = async () => {
     try {
       const userResponse = await fetch(
-        `http://localhost:5000/api/users/${userId}`
+        `${process.env.REACT_APP_API}/api/users/${userId}`
       );
       if (!userResponse.ok) {
         throw new Error(`HTTP error! Status: ${userResponse.status}`);
@@ -40,7 +40,7 @@ const SpecificUserDetail = () => {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const response = await fetch(`http://localhost:5000/api/users/delete`, {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/users/delete`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -60,7 +60,7 @@ const SpecificUserDetail = () => {
 
   const handleSaveUser = async (updatedUser) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/update`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/users/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

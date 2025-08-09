@@ -21,7 +21,7 @@ function SingleCategory() {
   useEffect(() => {
     const fetchAllPosts = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/posts`);
+        const response = await fetch(`${process.env.REACT_APP_API}/api/posts`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -45,7 +45,7 @@ function SingleCategory() {
     const fetchCategory = async () => {
           try {
             const response = await fetch(
-              `http://localhost:5000/api/categories/${id}`
+              `${process.env.REACT_APP_API}/api/categories/${id}`
             );
             if (!response.ok) {
               throw new Error(`HTTP error! Status: ${response.status}`);
@@ -74,7 +74,7 @@ function SingleCategory() {
           }
           const categoryUserId = categoryData[0].user_id;
           const response = await fetch(
-            `http://localhost:5000/api/users/${categoryUserId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
+            `${process.env.REACT_APP_API}/api/users/${categoryUserId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
           );
 
           
@@ -123,7 +123,7 @@ function SingleCategory() {
       const { userId: currentUserId, userRole } = getUserData();
       try {
         const response = await fetch(
-          `http://localhost:5000/api/categories/delete`,
+          `${process.env.REACT_APP_API}/api/categories/delete`,
           {
             method: "POST",
             headers: {
@@ -164,7 +164,7 @@ function SingleCategory() {
     }
 
     const response = await fetch(
-      `http://localhost:5000/api/categories/update`,
+      `${process.env.REACT_APP_API}/api/categories/update`,
       {
         method: "POST",
         headers: {
@@ -228,7 +228,7 @@ function SingleCategory() {
               id={post.id}
               title={post.title}
               body={post.body}
-              image={`http://localhost:5000/images/${post.image}`}
+              image={`${process.env.REACT_APP_API}/images/${post.image}`}
               rating={post.rating}
               user={findUserNameById(post.user_id)}
               created_at={post.created_at}
