@@ -3,6 +3,7 @@ class CommentModel {
     postId;
     userId;
     body;
+    public;
     createdAt;
 
     constructor() { }

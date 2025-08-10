@@ -97,7 +97,7 @@ function SinglePost() {
         getImage={getImage}
         averageRating={averageRating}
       />
-      <CommentsSection postId={id} />
+      <CommentsSection postId={id} postUserId={post.userId} />
     </div>
   );
 }

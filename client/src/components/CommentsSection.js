@@ -1,52 +1,87 @@
 import React, { useState, useEffect } from "react";
 import "../styles/CommentsSection.css";
+import { useAuth } from "../components/AuthContext.js";
 
-function CommentsSection({ postId }) {
+function CommentsSection({ postId, postUserId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [isPublic, setIsPublic] = useState(true); 
+  const [editIsPublic, setEditIsPublic] = useState(true);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState("");
+  const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
+  const { isAdmin, getUserData } = useAuth();
+  const { userId: currentUserId, userRole: currentUserRole } = getUserData();
+  const [canEditOrDelete, setCanEditOrDelete] = useState(false);
 
-  const fetchComments = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API}/api/comments-by-post-id?postId=${postId}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch comments");
-      }
-      const data = await response.json();
 
-      if (Array.isArray(data.data)) {
-        const commentsWithUsernames = await Promise.all(
-          data.data.map(async (comment) => {
-            const userResponse = await fetch(
-              `${process.env.REACT_APP_API}/api/users/${comment.userId}`
-            );
-            const userData = await userResponse.json();
-            return {
-              ...comment,
-              username:
-                userData.success && Array.isArray(userData.data)
-                  ? userData.data[0].username
-                  : "Unknown user",
-            };
-          })
+  const fetchComments = async (users) => {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API}/api/comments-by-post-id?postId=${postId}`
         );
-        setComments(commentsWithUsernames);
-      } else {
-        setComments([]);
-      }
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+        if (!response.ok) {
+          throw new Error("Failed to fetch comments");
+        }
+        const data = await response.json();
 
-  useEffect(() => {
+        if(currentUserRole !== "admin" && parseInt(currentUserId) !== postUserId ){
+          const filteredComments = data.data.filter(
+            (comment) => comment.public || parseInt(currentUserId) === comment.userId
+          );
+          data.data = filteredComments;
+          console.log("Filtered Comments: ", filteredComments);
+        }
+
+        data.data.map( (comment) => {
+          comment.canEditOrDelete = currentUserRole === "admin" || comment.userId === parseInt(currentUserId)
+        } )
+        if (Array.isArray(data.data)) {
+          const commentsWithUsernames = await Promise.all(
+            data.data.map(async (comment) => {
+            const userName = users.find( (user) => user.id === comment.userId ).username;
+              return {
+                ...comment,
+                username: userName ? userName : "Unknown user."
+              };
+            })
+          );
+          setComments(commentsWithUsernames);
+        } else {
+          setComments([]);
+        }
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+
+ const fetchUsers = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/users`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const result = await response.json();
+        setUsers(result.data);
+        return result.data;
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        alert(`Failed to fetch users: ${error.message}`);
+      }
+    };
+
+  
+useEffect(() => {
+
+  const fetchData = async () => {
     if (postId) {
-      fetchComments();
+      const users = await fetchUsers();
+      fetchComments(users);
     }
+  }
+  fetchData();
   }, [postId]);
 
   const handleAddComment = async () => {
@@ -62,6 +97,9 @@ function CommentsSection({ postId }) {
             postId: postId,
             userId: sessionStorage.getItem("userId"),
             body: newComment,
+            public: isPublic,
+            currentUserId: currentUserId,
+            currentUserRole: currentUserRole
           }),
         }
       );
@@ -71,13 +109,14 @@ function CommentsSection({ postId }) {
       }
 
       setNewComment("");
-      await fetchComments();
+      setIsPublic(true);
+      await fetchComments(users);
     } catch (error) {
       setError(error.message);
     }
   };
 
-  const handleEditComment = async (commentId) => {
+  const handleEditComment = async (commentId, userId) => {
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API}/api/comments/update`,
@@ -89,6 +128,12 @@ function CommentsSection({ postId }) {
           body: JSON.stringify({
             id: commentId,
             body: editCommentText,
+            public: editIsPublic,            
+            currentUserId: parseInt(currentUserId),
+            currentUserRole: currentUserRole,
+            commentUserId: userId
+
+
           }),
         }
       );
@@ -99,13 +144,14 @@ function CommentsSection({ postId }) {
 
       setEditingCommentId(null);
       setEditCommentText("");
-      await fetchComments();
+      setEditIsPublic(true);
+      await fetchComments(users);
     } catch (error) {
       setError(error.message);
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
+  const handleDeleteComment = async (commentId, commentUserId) => {
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API}/api/comments/delete`,
@@ -114,7 +160,13 @@ function CommentsSection({ postId }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id: commentId }),
+          body: JSON.stringify({ 
+            id: commentId,
+            currentUserId: parseInt(currentUserId),
+            currentUserRole: currentUserRole,
+            commentUserId: commentUserId
+          
+          }),
         }
       );
 
@@ -122,7 +174,7 @@ function CommentsSection({ postId }) {
         throw new Error("Failed to delete comment");
       }
 
-      await fetchComments();
+      await fetchComments(users);
     } catch (error) {
       setError(error.message);
     }
@@ -139,6 +191,16 @@ function CommentsSection({ postId }) {
           placeholder="Add a new comment"
           rows="4"
         ></textarea>
+        <div className="public-checkbox">
+          <label>
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+            />
+            Public (uncheck for private)
+          </label>
+        </div>
         <button onClick={handleAddComment} className="add-comment-button">
           Add Comment
         </button>
@@ -157,8 +219,16 @@ function CommentsSection({ postId }) {
                       onChange={(e) => setEditCommentText(e.target.value)}
                       rows="4"
                     ></textarea>
+                    <div className="public-checkbox">
+                        <input type="checkbox" checked={editIsPublic}
+                          onChange={(e) => setEditIsPublic(!editIsPublic)}
+                        />
+                      <label>
+                        Public (uncheck for private)
+                      </label>
+                    </div>
                     <button
-                      onClick={() => handleEditComment(comment.id)}
+                      onClick={() => handleEditComment(comment.id, comment.userId)}
                       className="save-button"
                     >
                       Save
@@ -174,21 +244,28 @@ function CommentsSection({ postId }) {
                   <div className="comment-content">
                     <p>{comment.body}</p>
                     <p>Posted by: {comment.username}</p>
+                    <p>Visibility: {comment.public ? "Public" : "Private"}</p>
+
+                    {comment.canEditOrDelete && (
+                    <>
                     <button
                       onClick={() => {
                         setEditingCommentId(comment.id);
                         setEditCommentText(comment.body);
+                        setEditIsPublic(comment.public); // Set the current public/private status
                       }}
                       className="edit-button"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteComment(comment.id)}
+                      onClick={() => handleDeleteComment(comment.id, comment.userId)}
                       className="delete-button"
                     >
                       Delete
                     </button>
+                  </>
+                    )}
                   </div>
                 )}
               </li>

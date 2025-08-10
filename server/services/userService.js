@@ -212,7 +212,6 @@ const getAllUsers = () => {
 const getUserById = (userId, currentUserId, currentUserRole) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
-    console.log("this is the response: ", response);
 
     if (!currentUserId || !currentUserRole) {
       response.success = false;

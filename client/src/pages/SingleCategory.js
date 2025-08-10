@@ -44,7 +44,6 @@ function SingleCategory() {
         const filteredPosts = result.data.filter(
           (post) => post.categoryId === parseInt(id)
         );
-        console.log("postovite: ", filteredPosts);
         const sortedPosts = filteredPosts.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );

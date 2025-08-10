@@ -42,7 +42,7 @@ const getAllComments = () => {
 const getAllCommentsByPostId = (postId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
-    const query = "SELECT * FROM comment WHERE postId = ?";
+    const query = "SELECT * FROM Comment WHERE postId = ?";
 
     connection.query(query, [postId], (error, results) => {
       if (error) {
@@ -66,7 +66,7 @@ const getCommentById = (id) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM comment WHERE id = ?";
+    const query = "SELECT * FROM Comment WHERE id = ?";
 
     connection.query(query, [id], (error, results) => {
       if (error) {
@@ -97,28 +97,46 @@ const getCommentById = (id) => {
   });
 };
 
-const deleteCommentById = (id) => {
-  return new Promise(async (resolve, reject) => {
-    const response = new ResponseModel();
+const deleteCommentById = async (id, currentUserId, currentUserRole, commentUserId) => {
+  try {
+    return await new Promise(async (resolve, reject) => {
+      const response = new ResponseModel();
 
-    const query = `DELETE FROM comment 
-                       WHERE id = ?`;
-
-    connection.query(query, [id], (error, results) => {
-      if (error) {
-        console.log(error);
+      if (!currentUserId || !currentUserRole) {
         response.success = false;
-        response.message = `Error querying the database: ${error}`;
-
+        response.status = 400;
+        response.message = 'Current user data is required';
         reject(response);
-      } else {
-        response.status = 200;
-        response.success = true;
-
-        resolve(response);
+        return;
       }
+
+      if (currentUserRole !== 'admin' && currentUserId !== commentUserId) {
+        response.success = false;
+        response.status = 403;
+        response.message = 'Unauthorized: You can only access your own data';
+        reject(response);
+        return;
+      }
+
+      const query = `DELETE FROM Comment 
+                         WHERE id = ?`;
+
+      connection.query(query, [id], (error, results) => {
+        if (error) {
+          console.log(error);
+          response.success = false;
+          response.message = `Error querying the database: ${error}`;
+
+          reject(response);
+        } else {
+          response.status = 200;
+          response.success = true;
+
+          resolve(response);
+        }
+      });
     });
-  }).catch((error) => {
+  } catch (error) {
     if (error instanceof ResponseModel) {
       return error;
     } else {
@@ -127,14 +145,14 @@ const deleteCommentById = (id) => {
       response.success = false;
       return response;
     }
-  });
+  }
 };
 
 const deleteAllComments = () => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    connection.query(`DELETE FROM comment`, (error, results) => {
+    connection.query(`DELETE FROM Comment`, (error, results) => {
       if (error) {
         console.log(error);
         response.success = false;
@@ -173,15 +191,16 @@ const createComment = (CommentModel) => {
       existingPostResult.data.length > 0
     ) {
       const existingUserResult = await userService.getUserById(
-        CommentModel.userId
+        CommentModel.currentUserId, CommentModel.currentUserId, CommentModel.currentUserRole
       );
+
       if (
         existingUserResult &&
         existingUserResult.data &&
         existingUserResult.data.length > 0
       ) {
-        const query = `INSERT INTO Comment (postId, userId, body, createdAt) 
-                                VALUES(?, ?, ?, ?)`;
+        const query = `INSERT INTO Comment (postId, userId, body, public, createdAt) 
+                                VALUES(?, ?, ?, ?, ?)`;
 
         const dateTimeNow = new Date();
         const formattedDateTimeNow = dateTimeNow
@@ -195,6 +214,7 @@ const createComment = (CommentModel) => {
             CommentModel.postId,
             CommentModel.userId,
             CommentModel.body,
+            CommentModel.public,
             formattedDateTimeNow,
           ],
           (error, results) => {
@@ -237,42 +257,57 @@ const createComment = (CommentModel) => {
   });
 };
 
-const updateComment = (CommentModel) => {
-  return new Promise(async (resolve, reject) => {
+const updateComment = async (CommentModel) => {
+  try {
     const response = new ResponseModel();
 
+    if (!CommentModel.currentUserId || !CommentModel.currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      throw response;
+    }
+
+
+    if (CommentModel.currentUserRole !== 'admin' && CommentModel.currentUserId !== CommentModel.commentUserId) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only access your own data';
+      throw response;
+    }
+
     const query = `UPDATE Comment 
-                        SET body = ?
+                        SET body = ?, public = ?
                         WHERE id = ?`;
 
-    connection.query(
-      query,
-      [CommentModel.body, CommentModel.id],
-      (error, results) => {
-        if (error) {
-          console.log(error);
-          response.success = false;
-          response.message = `Error querying the database: ${error}`;
-
-          reject(response);
-        } else {
-          response.status = 200;
-          response.success = true;
-
-          resolve(response);
+    return await new Promise((resolve, reject) => {
+      connection.query(
+        query,
+        [CommentModel.body, CommentModel.public, CommentModel.id],
+        (error, results) => {
+          if (error) {
+            console.log(error);
+            response.success = false;
+            response.message = `Error querying the database: ${error}`;
+            reject(response);
+          } else {
+            response.status = 200;
+            response.success = true;
+            resolve(response);
+          }
         }
-      }
-    );
-  }).catch((error) => {
+      );
+    });
+  } catch (error) {
     if (error instanceof ResponseModel) {
       return error;
     } else {
       const response = new ResponseModel();
-      response.message = error;
+      response.message = error.message || error;
       response.success = false;
       return response;
     }
-  });
+  }
 };
 
 module.exports = {

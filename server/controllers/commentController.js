@@ -7,6 +7,9 @@ const createComment = async (req, res) => {
   newComment.postId = req.body.postId;
   newComment.userId = req.body.userId;
   newComment.body = req.body.body;
+  newComment.public = req.body.public;
+  newComment.currentUserId = req.body.currentUserId;
+  newComment.currentUserRole = req.body.currentUserRole;
 
   const result = await commentService.createComment(newComment);
   if (result) {
@@ -16,11 +19,6 @@ const createComment = async (req, res) => {
   }
 };
 
-// I will add some comments here:
-
-
-// blbalblalblablalbalblablbalbalbla
-
 
 const updateComment = async (req, res) => {
   const commentId = parseInt(req.body.id);
@@ -28,6 +26,10 @@ const updateComment = async (req, res) => {
 
   commentToUpdate.id = commentId;
   commentToUpdate.body = req.body.body;
+  commentToUpdate.public = req.body.public;
+  commentToUpdate.currentUserId = req.body.currentUserId;
+  commentToUpdate.currentUserRole = req.body.currentUserRole;
+  commentToUpdate.commentUserId = req.body.commentUserId;
 
   const result = await commentService.updateComment(commentToUpdate);
   if (result) {
@@ -49,7 +51,17 @@ const deleteAllComments = async (req, res) => {
 
 const deleteCommentById = async (req, res) => {
   const commentId = parseInt(req.body.id);
-  const result = await commentService.deleteCommentById(commentId);
+  const currentUserId = req.body.currentUserId;
+  const currentUserRole = req.body.currentUserRole;
+  const commentUserId = req.body.commentUserId;
+
+  console.log("current user id: ", req.body.currentUserId);
+  console.log("current user role: ", req.body.currentUserRole);
+  console.log("commentId: ", commentId);
+  console.log("THe comments user id is: ", req.body.commentUserId);
+
+
+  const result = await commentService.deleteCommentById(commentId, currentUserId, currentUserRole, commentUserId);
 
   if (result) {
     res.status(result.status).json(result);
