@@ -18,7 +18,7 @@ const deleteCategoryByCategoryId = (id, currentUserId, currentUserRole) => {
 
     const category = await getCategoryById(id);
 
-    if (currentUserRole !== 'admin' && parseInt(currentUserId) !== parseInt(category.data[0].user_id)) {
+    if (currentUserRole !== 'admin' && parseInt(currentUserId) !== parseInt(category.data[0].userId)) {
       response.success = false;
       response.status = 403;
       response.message = 'Unauthorized: You can only update your own account';
@@ -66,7 +66,7 @@ const updateCategory = (CategoryModel) => {
       return reject(response);
     }
 
-    if (CategoryModel.currentUserRole !== 'admin' && parseInt(CategoryModel.currentUserId) !== parseInt(CategoryModel.data[0].user_id)) {
+    if (CategoryModel.currentUserRole !== 'admin' && parseInt(CategoryModel.currentUserId) !== parseInt(CategoryModel.data[0].userId)) {
       response.success = false;
       response.status = 403;
       response.message = 'Unauthorized: You can only update your own account';
@@ -125,7 +125,7 @@ const createCategory = (CategoryModel) => {
 
         reject(response);
       } else {
-        const query = `INSERT INTO Category (user_id, title, created_at) 
+        const query = `INSERT INTO Category (userId, title, createdAt) 
                                 VALUES(?, ?, ?)`;
 
         const dateTimeNow = new Date();
@@ -136,7 +136,7 @@ const createCategory = (CategoryModel) => {
 
         connection.query(
           query,
-          [CategoryModel.user_id, CategoryModel.title, formattedDateTimeNow],
+          [CategoryModel.userId, CategoryModel.title, formattedDateTimeNow],
           (error, results) => {
             if (error) {
               response.success = false;
@@ -169,7 +169,7 @@ const getAllCategories = () => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    connection.query("SELECT * FROM category", (error, resultsCategories) => {
+    connection.query("SELECT * FROM Category", (error, resultsCategories) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
@@ -188,7 +188,7 @@ const getAllCategories = () => {
         // Create a new array to avoid mutating the original results
         const enrichedCategories = [];
         for (const category of resultsCategories) {
-          const user = resultsUsers.find(item => String(item.id) === String(category.user_id));
+          const user = resultsUsers.find(item => String(item.id) === String(category.userId));
           enrichedCategories.push({
             ...category,
             username: user ? user.username : "Unknown User"
@@ -222,7 +222,7 @@ const getCategoriesByUserId = (id) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM category WHERE user_id = ?";
+    const query = "SELECT * FROM Category WHERE userId = ?";
 
     connection.query(query, [id], (error, results) => {
       if (error) {
@@ -258,7 +258,7 @@ const getCategoryByTitle = (title) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM category WHERE title = ? LIMIT 1";
+    const query = "SELECT * FROM Category WHERE title = ? LIMIT 1";
 
     connection.query(query, [title], (error, results) => {
       if (error) {
@@ -293,7 +293,7 @@ const getCategoryById = (id) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM category WHERE id = ?";
+    const query = "SELECT * FROM Category WHERE id = ?";
 
     connection.query(query, [id], (error, results) => {
       if (error) {

@@ -1,7 +1,7 @@
 class RatingModel {
     id;
-    post_id;
-    user_id;
+    postId;
+    userId;
     stars;
     date;
 

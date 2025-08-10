@@ -212,6 +212,7 @@ const getAllUsers = () => {
 const getUserById = (userId, currentUserId, currentUserRole) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
+    console.log("this is the response: ", response);
 
     if (!currentUserId || !currentUserRole) {
       response.success = false;
@@ -309,7 +310,7 @@ const getUserByEmail = (email) => {
         response.success = true;
         response.data = results;
         if (results.length === 0) {
-          response.message = "No user was found!";
+          response.message = "No User was found!";
         }
 
         resolve(response);

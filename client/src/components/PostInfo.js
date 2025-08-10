@@ -18,10 +18,10 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
     try {
       const [userResponse, categoryResponse, ratingsResponse] =
         await Promise.all([
-          fetch(`${process.env.REACT_APP_API}/api/users/${post.user_id}`),
-          fetch(`${process.env.REACT_APP_API}/api/categories/${post.category_id}`),
+          fetch(`${process.env.REACT_APP_API}/api/users/${post.userId}`),
+          fetch(`${process.env.REACT_APP_API}/api/categories/${post.categoryId}`),
           fetch(
-            `${process.env.REACT_APP_API}/api/ratings-by-post-id?post_id=${post.id}`
+            `${process.env.REACT_APP_API}/api/ratings-by-post-id?postId=${post.id}`
           ),
         ]);
 
@@ -51,7 +51,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
         const ratingsWithUsernames = await Promise.all(
           ratingsData.data.map(async (rating) => {
             const userResponse = await fetch(
-              `${process.env.REACT_APP_API}/api/users/${rating.user_id}`
+              `${process.env.REACT_APP_API}/api/users/${rating.userId}`
             );
             const userData = await userResponse.json();
             return {
@@ -68,7 +68,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
         calculateAverageRating(ratingsWithUsernames);
 
         const foundRating = ratingsWithUsernames.find(
-          (rating) => rating.user_id === parseInt(userId)
+          (rating) => rating.userId === parseInt(userId)
         );
         setUserRating(foundRating ? foundRating.stars : null);
       } else {
@@ -95,8 +95,8 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
       const endpoint = userRating !== null ? "update" : "create";
       const method = endpoint === "update" ? "PUT" : "POST";
       const body = JSON.stringify({
-        post_id: post.id,
-        user_id: userId,
+        postId: post.id,
+        userId: userId,
         stars,
       });
 
@@ -129,7 +129,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ rating_id: ratingId }), // Sending ratingId in the request body
+          body: JSON.stringify({ ratingId: ratingId }), // Sending ratingId in the request body
         }
       );
   
@@ -152,7 +152,7 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
 
   useEffect(() => {
     fetchAdditionalData();
-  }, [post.id, post.user_id, post.category_id]);
+  }, [post.id, post.userId, post.categoryId]);
 
   return (
     <div className="post-info">

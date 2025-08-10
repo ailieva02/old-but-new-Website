@@ -1,9 +1,9 @@
 class CommentModel {
     id;
-    post_id;
-    user_id;
+    postId;
+    userId;
     body;
-    created_at;
+    createdAt;
 
     constructor() { }
 }

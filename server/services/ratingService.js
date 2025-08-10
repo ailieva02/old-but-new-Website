@@ -5,13 +5,13 @@ const postService = require("../services/postService");
 const userService = require("../services/userService");
 const { response } = require("express");
 
-const getAllRatingsByPostId = (post_id) => {
+const getAllRatingsByPostId = (postId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM Rating WHERE post_id = ?";
+    const query = "SELECT * FROM Rating WHERE postId = ?";
 
-    connection.query(query, [post_id], (error, results) => {
+    connection.query(query, [postId], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
@@ -21,7 +21,7 @@ const getAllRatingsByPostId = (post_id) => {
         response.success = true;
         response.data = results;
         if (results.length === 0) {
-          response.message = `No ratings found for post_id: ${post_id}!`;
+          response.message = `No ratings found for postId: ${postId}!`;
         }
         return resolve(response); // Resolve with response
       }
@@ -69,15 +69,15 @@ const getRatingById = (id) => {
   });
 };
 
-const getAverageRatingForPostId = (post_id) => {
+const getAverageRatingForPostId = (postId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
     const query = `SELECT AVG(stars) AS average_stars
                         FROM Rating
-                        WHERE post_id = ?`;
+                        WHERE postId = ?`;
 
-    connection.query(query, [post_id], (error, results) => {
+    connection.query(query, [postId], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
@@ -108,7 +108,7 @@ const createRating = (RatingModel) => {
     const response = new ResponseModel();
 
     const existingPostResult = await postService.getPostById(
-      RatingModel.post_id
+      RatingModel.postId
     );
     if (
       existingPostResult &&
@@ -116,14 +116,14 @@ const createRating = (RatingModel) => {
       existingPostResult.data.length > 0
     ) {
       const existingUserResult = await userService.getUserById(
-        RatingModel.user_id
+        RatingModel.userId
       );
       if (
         existingUserResult &&
         existingUserResult.data &&
         existingUserResult.data.length > 0
       ) {
-        const query = `INSERT INTO Rating (post_id, user_id, stars, date) 
+        const query = `INSERT INTO Rating (postId, userId, stars, date) 
                                 VALUES(?, ?, ?, ?)`;
 
         const dateTimeNow = new Date();
@@ -135,8 +135,8 @@ const createRating = (RatingModel) => {
         connection.query(
           query,
           [
-            RatingModel.post_id,
-            RatingModel.user_id,
+            RatingModel.postId,
+            RatingModel.userId,
             RatingModel.stars,
             formattedDateTimeNow,
           ],
@@ -155,14 +155,14 @@ const createRating = (RatingModel) => {
           }
         );
       } else {
-        response.message = `No user was found for this user id: ${RatingModel.user_id}!`;
+        response.message = `No user was found for this user id: ${RatingModel.userId}!`;
         response.status = 409;
         response.success = false;
 
         reject(response);
       }
     } else {
-      response.message = `No post was found for this post id: ${RatingModel.post_id}!`;
+      response.message = `No post was found for this post id: ${RatingModel.postId}!`;
       response.status = 409;
       response.success = false;
 
@@ -216,13 +216,13 @@ const updateRating = (rating) => {
   });
 };
 
-const getRatingByPostAndUser = (post_id, user_id) => {
+const getRatingByPostAndUser = (postId, userId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM Rating WHERE post_id = ? AND user_id = ?";
+    const query = "SELECT * FROM Rating WHERE postId = ? AND userId = ?";
 
-    connection.query(query, [post_id, user_id], (error, results) => {
+    connection.query(query, [postId, userId], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;

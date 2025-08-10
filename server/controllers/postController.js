@@ -3,23 +3,23 @@ const postService = require("../services/postService");
 
 const createPost = async (req, res) => {
   try {
-    const { category_id, title, body, currentUserId, currentUserRole } = req.body;
+    const { categoryId, title, body, currentUserId, currentUserRole } = req.body;
     const image = req.file;
 
     // Validate required fields
-    if (!category_id || !title || !body || !currentUserId || !currentUserRole) {
+    if (!categoryId || !title || !body || !currentUserId || !currentUserRole) {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: 'Missing required fields: category_id, title, body, currentUserId, or currentUserRole',
+        message: 'Missing required fields: categoryId, title, body, currentUserId, or currentUserRole',
       });
     }
 
     const postModel = {
-      category_id,
+      categoryId,
       title,
       body,
-      user_id: currentUserId, // Use currentUserId as user_id
+      userId: currentUserId, // Use currentUserId as userId
       image: image ? image.filename : null,
     };
 
@@ -37,12 +37,12 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    const { id, category_id, title, body, image, user_id } = req.body;
+    const { id, categoryId, title, body, image, userId } = req.body;
     const newImage = req.file ? req.file.filename : image;
     const postModel = {
       id: parseInt(id),
-      category_id: parseInt(category_id),
-      user_id,
+      categoryId: parseInt(categoryId),
+      userId,
       title,
       body,
       image: newImage,
@@ -113,11 +113,11 @@ const getPostById = async (req, res) => {
 };
 
 const getPostByCategoryIdAndTitle = async (req, res) => {
-  const category_id = parseInt(req.body.category_id);
+  const categoryId = parseInt(req.body.categoryId);
   const title = req.body.title;
 
   const result = await postService.getPostByCategoryIdAndTitle(
-    category_id,
+    categoryId,
     title
   );
   if (result) {
@@ -128,9 +128,9 @@ const getPostByCategoryIdAndTitle = async (req, res) => {
 };
 
 const getPostsByCategoryId = async (req, res) => {
-  const category_id = parseInt(req.body.category_id);
+  const categoryId = parseInt(req.body.categoryId);
 
-  const result = await postService.getPostsByCategoryId(category_id);
+  const result = await postService.getPostsByCategoryId(categoryId);
   if (result) {
     res.status(result.status).json(result);
   } else {
@@ -139,9 +139,9 @@ const getPostsByCategoryId = async (req, res) => {
 };
 
 const getPostsByUserId = async (req, res) => {
-  const user_id = parseInt(req.body.user_id);
+  const userId = parseInt(req.body.userId);
 
-  const result = await postService.getPostsByUserId(user_id);
+  const result = await postService.getPostsByUserId(userId);
   if (result) {
     res.status(result.status).json(result);
   } else {

@@ -17,8 +17,8 @@ const createPost = (postModel, currentUserId, currentUserRole) => {
       return reject(response);
     }
 
-    // Restrict to own user_id or admin
-    if (currentUserRole !== "admin" && currentUserId !== postModel.user_id) {
+    // Restrict to own userId or admin
+    if (currentUserRole !== "admin" && currentUserId !== postModel.userId) {
       response.success = false;
       response.status = 403;
       response.message = "Unauthorized: You can only create posts for yourself";
@@ -27,25 +27,25 @@ const createPost = (postModel, currentUserId, currentUserRole) => {
 
     try {
       // Validate user existence
-      const existingUserResult = await userService.getUserById(postModel.user_id, currentUserId, currentUserRole);
+      const existingUserResult = await userService.getUserById(postModel.userId, currentUserId, currentUserRole);
       if (!existingUserResult.success || !existingUserResult.data || existingUserResult.data.length === 0) {
         response.success = false;
         response.status = 404;
-        response.message = `No user was found for this user id: ${postModel.user_id}`;
+        response.message = `No user was found for this user id: ${postModel.userId}`;
         return reject(response);
       }
 
       // Validate category existence
-      const existingCategoryResult = await categoryService.getCategoryById(postModel.category_id);
+      const existingCategoryResult = await categoryService.getCategoryById(postModel.categoryId);
       if (!existingCategoryResult.success || !existingCategoryResult.data || existingCategoryResult.data.length === 0) {
         response.success = false;
         response.status = 404;
-        response.message = `No category was found for this category id: ${postModel.category_id}`;
+        response.message = `No category was found for this category id: ${postModel.categoryId}`;
         return reject(response);
       }
 
       // Check for duplicate post title in category
-      const existingPostResult = await getPostByCategoryIdAndTitle(postModel.category_id, postModel.title);
+      const existingPostResult = await getPostByCategoryIdAndTitle(postModel.categoryId, postModel.title);
       if (existingPostResult.success && existingPostResult.data && existingPostResult.data.length > 0) {
         response.success = false;
         response.status = 409;
@@ -55,13 +55,13 @@ const createPost = (postModel, currentUserId, currentUserRole) => {
 
       // Insert post
       const query = `
-        INSERT INTO Post (category_id, user_id, title, body, image, created_at)
+        INSERT INTO Post (categoryId, userId, title, body, image, createdAt)
         VALUES (?, ?, ?, ?, ?, ?)
       `;
       const dateTimeNow = new Date().toISOString().slice(0, 19).replace("T", " ");
       const values = [
-        postModel.category_id,
-        postModel.user_id,
+        postModel.categoryId,
+        postModel.userId,
         postModel.title,
         postModel.body,
         postModel.image ? `${postModel.image}` : null,
@@ -97,16 +97,16 @@ const updatePost = (PostModel) => {
     const response = new ResponseModel();
 
     // Validate the new category
-    const categoryCheck = await categoryService.getCategoryById(PostModel.category_id);
+    const categoryCheck = await categoryService.getCategoryById(PostModel.categoryId);
     if (!categoryCheck.success || categoryCheck.data.length === 0) {
       response.success = false;
-      response.message = `Category with id ${PostModel.category_id} does not exist.`;
+      response.message = `Category with id ${PostModel.categoryId} does not exist.`;
       response.status = 404;
       return reject(response);
     }
 
     // Ensure title uniqueness in the new category
-    const titleConflict = await getPostByCategoryIdAndTitle(PostModel.category_id, PostModel.title);
+    const titleConflict = await getPostByCategoryIdAndTitle(PostModel.categoryId, PostModel.title);
     if (titleConflict.data && titleConflict.data.some(post => post.id !== PostModel.id)) {
       response.success = false;
       response.message = `The title "${PostModel.title}" is already used in this category.`;
@@ -114,7 +114,7 @@ const updatePost = (PostModel) => {
       return reject(response);
     }
     
-if (!PostModel.id || !PostModel.category_id || !PostModel.user_id) {
+if (!PostModel.id || !PostModel.categoryId || !PostModel.userId) {
   response.success = false;
   response.message = "Missing required fields for update.";
   return reject(response);
@@ -122,13 +122,13 @@ if (!PostModel.id || !PostModel.category_id || !PostModel.user_id) {
 
     // Update query (no need to update image, as it remains the same unless provided)
     const query = `UPDATE Post 
-                   SET category_id = ?, title = ?, body = ? 
-                   WHERE id = ? AND user_id = ?`;
+                   SET categoryId = ?, title = ?, body = ? 
+                   WHERE id = ? AND userId = ?`;
 
-    // Use PostModel.user_id from the post itself (instead of session user ID)
+    // Use PostModel.userId from the post itself (instead of session user ID)
     connection.query(
       query,
-      [PostModel.category_id, PostModel.title, PostModel.body, PostModel.id, PostModel.user_id],
+      [PostModel.categoryId, PostModel.title, PostModel.body, PostModel.id, PostModel.userId],
       (error, results) => {
         if (error) {
           response.success = false;
@@ -294,15 +294,15 @@ const getPostById = (id) => {
   });
 };
 
-const getPostByCategoryIdAndTitle = (category_id, title) => {
+const getPostByCategoryIdAndTitle = (categoryId, title) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
     const query = `SELECT * FROM post 
-                        WHERE category_id = ? 
+                        WHERE categoryId = ? 
                         AND title = ?`;
 
-    connection.query(query, [category_id, title], (error, results) => {
+    connection.query(query, [categoryId, title], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
@@ -331,13 +331,13 @@ const getPostByCategoryIdAndTitle = (category_id, title) => {
   });
 };
 
-const getPostsByCategoryId = (category_id) => {
+const getPostsByCategoryId = (categoryId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM post WHERE category_id = ?";
+    const query = "SELECT * FROM post WHERE categoryId = ?";
 
-    connection.query(query, [category_id], (error, results) => {
+    connection.query(query, [categoryId], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
@@ -367,13 +367,13 @@ const getPostsByCategoryId = (category_id) => {
   });
 };
 
-const getPostsByUserId = (user_id) => {
+const getPostsByUserId = (userId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM post WHERE user_id = ?";
+    const query = "SELECT * FROM post WHERE userId = ?";
 
-    connection.query(query, [user_id], (error, results) => {
+    connection.query(query, [userId], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;

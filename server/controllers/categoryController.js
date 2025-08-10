@@ -4,7 +4,7 @@ const categoryService = require("../services/categoryService");
 const createCategory = async (req, res) => {
   const newCategory = new CategoryModel();
 
-  newCategory.user_id = req.body.user_id;
+  newCategory.userId = req.body.currentUserId;
   newCategory.title = req.body.title;
 
   const result = await categoryService.createCategory(newCategory);

@@ -22,7 +22,7 @@ function CommentsSection({ postId }) {
         const commentsWithUsernames = await Promise.all(
           data.data.map(async (comment) => {
             const userResponse = await fetch(
-              `${process.env.REACT_APP_API}/api/users/${comment.user_id}`
+              `${process.env.REACT_APP_API}/api/users/${comment.userId}`
             );
             const userData = await userResponse.json();
             return {
@@ -59,8 +59,8 @@ function CommentsSection({ postId }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            post_id: postId,
-            user_id: sessionStorage.getItem("userId"),
+            postId: postId,
+            userId: sessionStorage.getItem("userId"),
             body: newComment,
           }),
         }

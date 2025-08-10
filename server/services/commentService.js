@@ -39,12 +39,12 @@ const getAllComments = () => {
   });
 };
 
-const getAllCommentsByPostId = (post_id) => {
+const getAllCommentsByPostId = (postId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
-    const query = "SELECT * FROM comment WHERE post_id = ?";
+    const query = "SELECT * FROM comment WHERE postId = ?";
 
-    connection.query(query, [post_id], (error, results) => {
+    connection.query(query, [postId], (error, results) => {
       if (error) {
         response.success = false;
         response.message = `Error querying the database: ${error}`;
@@ -165,7 +165,7 @@ const createComment = (CommentModel) => {
     const response = new ResponseModel();
 
     const existingPostResult = await postService.getPostById(
-      CommentModel.post_id
+      CommentModel.postId
     );
     if (
       existingPostResult &&
@@ -173,14 +173,14 @@ const createComment = (CommentModel) => {
       existingPostResult.data.length > 0
     ) {
       const existingUserResult = await userService.getUserById(
-        CommentModel.user_id
+        CommentModel.userId
       );
       if (
         existingUserResult &&
         existingUserResult.data &&
         existingUserResult.data.length > 0
       ) {
-        const query = `INSERT INTO Comment (post_id, user_id, body, created_at) 
+        const query = `INSERT INTO Comment (postId, userId, body, createdAt) 
                                 VALUES(?, ?, ?, ?)`;
 
         const dateTimeNow = new Date();
@@ -192,8 +192,8 @@ const createComment = (CommentModel) => {
         connection.query(
           query,
           [
-            CommentModel.post_id,
-            CommentModel.user_id,
+            CommentModel.postId,
+            CommentModel.userId,
             CommentModel.body,
             formattedDateTimeNow,
           ],
@@ -212,14 +212,14 @@ const createComment = (CommentModel) => {
           }
         );
       } else {
-        response.message = `No user was found for this user id: ${CommentModel.user_id}!`;
+        response.message = `No user was found for this user id: ${CommentModel.userId}!`;
         response.status = 409;
         response.success = false;
 
         reject(response);
       }
     } else {
-      response.message = `No post was found for this post id: ${CommentModel.post_id}!`;
+      response.message = `No post was found for this post id: ${CommentModel.postId}!`;
       response.status = 409;
       response.success = false;
 

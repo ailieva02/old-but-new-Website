@@ -1,11 +1,11 @@
 class PostModel {
     id;
-    category_id;
-    user_id;
+    categoryId;
+    userId;
     title;
     body;
     image;
-    created_at;
+    createdAt;
 
     constructor() { }
 }

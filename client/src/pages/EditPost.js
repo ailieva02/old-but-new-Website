@@ -36,7 +36,7 @@ function EditPost() {
         const post = result.data[0];
         setTitle(post.title);
         setBody(post.body);
-        setCategory(post.category_id);
+        setCategory(post.categoryId);
       } catch (error) {
         console.error(`Error fetching post data: ${error.message}`);
       }
@@ -51,10 +51,10 @@ function EditPost() {
   
     const formData = {
       id: parseInt(id),
-      category_id: category,
+      categoryId: category,
       title: title,
       body: body,
-      user_id: sessionStorage.getItem("userId"),
+      userId: sessionStorage.getItem("userId"),
     };
   
     try {

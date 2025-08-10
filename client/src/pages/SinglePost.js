@@ -40,7 +40,7 @@ function SinglePost() {
     const fetchAverageRating = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_API}/api/ratings-average-by-post-id?post_id=${id}`
+          `${process.env.REACT_APP_API}/api/ratings-average-by-post-id?postId=${id}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch the average rating");

@@ -34,6 +34,8 @@ function CategoryCard({
           const response = await fetch(
             `${process.env.REACT_APP_API}/api/users/${userId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
           );
+
+          console.log("ova e responso: ", response);
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(

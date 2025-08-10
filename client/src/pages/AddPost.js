@@ -41,7 +41,7 @@ function AddPost() {
     const {userId: currentUserId, userRole: currentUserRole} = getUserData();
 
     const formData = new FormData();
-    formData.append("category_id", category);
+    formData.append("categoryId", category);
     formData.append("title", title);
     formData.append("body", body);
     if (image) {

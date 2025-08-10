@@ -19,6 +19,21 @@ function SingleCategory() {
   const [modalTitle, setModalTitle] = useState("");
 
   useEffect(() => {
+
+     const fetchUsers = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/users`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const result = await response.json();
+        setUsers(result.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        alert(`Failed to fetch users: ${error.message}`);
+      }
+    };
+
     const fetchAllPosts = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_API}/api/posts`);
@@ -27,10 +42,11 @@ function SingleCategory() {
         }
         const result = await response.json();
         const filteredPosts = result.data.filter(
-          (post) => post.category_id === parseInt(id)
+          (post) => post.categoryId === parseInt(id)
         );
+        console.log("postovite: ", filteredPosts);
         const sortedPosts = filteredPosts.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setPosts(sortedPosts || []);
         console.log("Posts fetched successfully:", sortedPosts);
@@ -68,11 +84,11 @@ function SingleCategory() {
 
         if (currentUserId && currentUserId !== "Unknown") {
           // If userId matches current user, use stored username
-          if (parseInt(categoryData[0].user_id) === parseInt(currentUserId)) {
-            setCanEditOrDelete(isAdmin || parseInt(categoryData[0].user_id) === parseInt(currentUserId, 10));
+          if (parseInt(categoryData[0].userId) === parseInt(currentUserId)) {
+            setCanEditOrDelete(isAdmin || parseInt(categoryData[0].userId) === parseInt(currentUserId, 10));
             return;
           }
-          const categoryUserId = categoryData[0].user_id;
+          const categoryUserId = categoryData[0].userId;
           const response = await fetch(
             `${process.env.REACT_APP_API}/api/users/${categoryUserId}?currentUserId=${currentUserId}&currentUserRole=${userRole}`
           );
@@ -103,6 +119,7 @@ function SingleCategory() {
       await fetchAllPosts();
       const categoryData = await fetchCategory();
       await fetchUsername(categoryData);
+      await fetchUsers();
       setLoading(false);
     };
 
@@ -173,7 +190,7 @@ function SingleCategory() {
         body: JSON.stringify({
           id: parseInt(id),
           title: updatedCategory.title,
-          user_id: updatedCategory.user_id,
+          userId: updatedCategory.userId,
           currentUserId: parseInt(currentUserId),
           currentUserRole: userRole
         }),
@@ -228,10 +245,10 @@ function SingleCategory() {
               id={post.id}
               title={post.title}
               body={post.body}
-              image={`${process.env.REACT_APP_API}/images/${post.image}`}
+              image={post.image}
               rating={post.rating}
-              user={findUserNameById(post.user_id)}
-              created_at={post.created_at}
+              user={findUserNameById(post.userId)}
+              createdAt={post.createdAt}
               onClick={() => handlePostClick(post.id)}
             />
           ))

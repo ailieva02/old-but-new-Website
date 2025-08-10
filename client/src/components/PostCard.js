@@ -12,11 +12,11 @@ const getImage = (imageName) => {
   }
 };
 
-function PostCard({ id, title, body, image, rating, user, created_at }) {
+function PostCard({ id, title, body, image, rating, user, createdAt }) {
   const imageUrl = getImage(image);
 
   // Format date as day-month-year
-  const formattedDate = new Date(created_at).toLocaleDateString("en-GB", {
+  const formattedDate = new Date(createdAt).toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

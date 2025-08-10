@@ -74,6 +74,7 @@ function Categories() {
 
   const handleSave = async (category) => {
     try {
+      console.log(category);
       const response = await fetch(
         `${process.env.REACT_APP_API}/api/categories/${
           modalType === "edit" ? "update" : "create"
@@ -86,8 +87,9 @@ function Categories() {
           body: JSON.stringify({
             title: category.title,
             ...(modalType === "edit" && { id: selectedCategory }),
-            created_at:
+            createdAt:
               modalType === "create" ? new Date().toISOString() : undefined,
+            userId: sessionStorage.getItem("userId"),
             currentUserId: sessionStorage.getItem("userId"),
             currentUserRole: sessionStorage.getItem("userRole")
           }),
@@ -126,8 +128,8 @@ function Categories() {
               key={category.id}
               id={category.id}
               title={category.title}
-              createdAt={category.created_at}
-              userId={category.user_id}
+              createdAt={category.createdAt}
+              userId={category.userId}
               username={category.username}
               onEdit={handleEdit}
               onDelete={handleDelete}

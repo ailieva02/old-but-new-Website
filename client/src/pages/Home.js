@@ -70,8 +70,8 @@ function Home() {
   // Organize posts by category
   const postsByCategory = categories.reduce((acc, category) => {
     const filteredPosts = posts
-      .filter((post) => post.category_id === category.id)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort posts by date, latest first
+      .filter((post) => post.categoryId === category.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date, latest first
     if (filteredPosts.length > 0) {
       acc[category.title] = filteredPosts;
     }
@@ -112,8 +112,8 @@ function Home() {
                 body={post.body}
                 image={post.image}
                 rating={post.rating}
-                user={findUserNameById(post.user_id)}
-                created_at={post.created_at}
+                user={findUserNameById(post.userId)}
+                createdAt={post.createdAt}
               />
             ))}
           </div>

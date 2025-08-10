@@ -1,8 +1,8 @@
 class CategoryModel {
     id;
-    user_id;
+    userId;
     title;
-    created_at;
+    createdAt;
 
     constructor() {}
 }

@@ -35,6 +35,9 @@ const getUser = async (req, res) => {
         const userId = parseInt(req.params.id);
         const currentUserId = parseInt(req.query.currentUserId);
         const currentUserRole = req.query.currentUserRole;
+        console.log("Controller: ", currentUserId);
+        console.log("Controller role: ", currentUserRole);
+
 
         const result = await userService.getUserById(userId, currentUserId, currentUserRole);
         res.status(result.status).json(result);

@@ -4,8 +4,8 @@ const ratingService = require("../services/ratingService");
 const createRating = async (req, res) => {
   const newRating = new RatingModel();
 
-  newRating.post_id = req.body.post_id;
-  newRating.user_id = req.body.user_id;
+  newRating.postId = req.body.postId;
+  newRating.userId = req.body.userId;
   newRating.stars = parseInt(req.body.stars);
 
   const result = await ratingService.createRating(newRating);
@@ -17,11 +17,11 @@ const createRating = async (req, res) => {
 };
 
 const updateRating = async (req, res) => {
-  const { post_id, user_id, stars } = req.body;
+  const { postId, userId, stars } = req.body;
 
   try {
     // Step 1: Check if the user already has a rating for the post
-    const existingRatingResponse = await ratingService.getRatingByPostAndUser(post_id, user_id);
+    const existingRatingResponse = await ratingService.getRatingByPostAndUser(postId, userId);
     const existingRating = existingRatingResponse.data;  // Access the rating object directly
     
     if (!existingRating) {
@@ -46,10 +46,10 @@ const updateRating = async (req, res) => {
 
 
 const getRatingByPostAndUser = async (req, res) => {
-  const { post_id, user_id } = req.query;
+  const { postId, userId } = req.query;
 
   try {
-    const result = await ratingService.getRatingByPostAndUser(post_id, user_id);
+    const result = await ratingService.getRatingByPostAndUser(postId, userId);
 
     if (result.success && result.data) {
       res.status(result.status).json(result);
@@ -64,9 +64,9 @@ const getRatingByPostAndUser = async (req, res) => {
 
 
 const getAllRatingsByPostId = async (req, res) => {
-  const post_id = parseInt(req.query.post_id);
+  const postId = parseInt(req.query.postId);
   try {
-    const result = await ratingService.getAllRatingsByPostId(post_id);
+    const result = await ratingService.getAllRatingsByPostId(postId);
 
     if (result.success) {
       res.status(result.status).json(result);
@@ -91,8 +91,8 @@ const getRatingById = async (req, res) => {
 };
 
 const getAverageRatingForPostId = async (req, res) => {
-  const post_id = parseInt(req.body.id);
-  const result = await ratingService.getAverageRatingForPostId(post_id);
+  const postId = parseInt(req.body.id);
+  const result = await ratingService.getAverageRatingForPostId(postId);
 
   if (result) {
     res.status(result.status).json(result);
@@ -102,7 +102,7 @@ const getAverageRatingForPostId = async (req, res) => {
 };
 
 const deleteRatingById = async (req, res) => {
-  const ratingId = parseInt(req.body.rating_id); // Changed 'id' to 'rating_id'
+  const ratingId = parseInt(req.body.ratingId); // Changed 'id' to 'ratingId'
   
   // Check if ratingId is a valid number before proceeding
   if (isNaN(ratingId)) {
