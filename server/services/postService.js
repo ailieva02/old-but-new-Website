@@ -263,7 +263,7 @@ const getPostById = (id) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM post WHERE id = ?";
+    const query = "SELECT * FROM Post WHERE id = ?";
 
     connection.query(query, [id], (error, results) => {
       if (error) {
@@ -298,7 +298,7 @@ const getPostByCategoryIdAndTitle = (categoryId, title) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `SELECT * FROM post 
+    const query = `SELECT * FROM Post 
                         WHERE categoryId = ? 
                         AND title = ?`;
 
@@ -335,7 +335,7 @@ const getPostsByCategoryId = (categoryId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM post WHERE categoryId = ?";
+    const query = "SELECT * FROM Post WHERE categoryId = ?";
 
     connection.query(query, [categoryId], (error, results) => {
       if (error) {
@@ -371,7 +371,7 @@ const getPostsByUserId = (userId) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = "SELECT * FROM post WHERE userId = ?";
+    const query = "SELECT * FROM Post WHERE userId = ?";
 
     connection.query(query, [userId], (error, results) => {
       if (error) {
