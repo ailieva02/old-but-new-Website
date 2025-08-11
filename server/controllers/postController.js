@@ -37,7 +37,7 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    const { id, categoryId, title, body, image, userId } = req.body;
+    const { id, categoryId, title, body, image, userId, currentUserId, currentUserRole } = req.body;
     const newImage = req.file ? req.file.filename : image;
     const postModel = {
       id: parseInt(id),
@@ -46,6 +46,8 @@ const updatePost = async (req, res) => {
       title,
       body,
       image: newImage,
+      currentUserId: currentUserId,
+      currentUserRole: currentUserRole
     };
 
     const response = await postService.updatePost(postModel);
@@ -60,27 +62,36 @@ const updatePost = async (req, res) => {
 };
 
 
-
-
-
 const deletePostById = async (req, res) => {
-  const postId = parseInt(req.body.id);
-  const result = await postService.deletePostById(postId);
+  try {
+    const { id, currentUserId, currentUserRole } = req.body;
 
-  // console.log("This is the postID:", postId);
+    // Validate required fields
+    if (!id || !currentUserId || !currentUserRole) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Missing required fields: id, currentUserId, or currentUserRole",
+      });
+    }
 
-  // console.log("This is the request: ", req);
+    const result = await postService.deletePostById(
+      parseInt(id),
+      parseInt(currentUserId),
+      currentUserRole
+    );
 
-  // console.log("This is the request body: ",  req)
-
-
-
-  if (result) {
     res.status(result.status).json(result);
-  } else {
-    res.status(500).json("Something went wrong!");
+  } catch (error) {
+    console.error("Error in deletePostById:", error.stack);
+    res.status(error.status || 500).json({
+      success: false,
+      status: error.status || 500,
+      message: error.message || "Something went wrong!",
+    });
   }
 };
+
 
 const deleteAllPosts = async (req, res) => {
   const result = await postService.deleteAllPosts();

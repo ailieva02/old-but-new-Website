@@ -107,75 +107,71 @@ const createRating = (RatingModel) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    const existingPostResult = await postService.getPostById(
-      RatingModel.postId
-    );
-    if (
-      existingPostResult &&
-      existingPostResult.data &&
-      existingPostResult.data.length > 0
-    ) {
-      const existingUserResult = await userService.getUserById(
-        RatingModel.userId
-      );
-      if (
-        existingUserResult &&
-        existingUserResult.data &&
-        existingUserResult.data.length > 0
-      ) {
-        const query = `INSERT INTO Rating (postId, userId, stars, date) 
-                                VALUES(?, ?, ?, ?)`;
-
-        const dateTimeNow = new Date();
-        const formattedDateTimeNow = dateTimeNow
-          .toISOString()
-          .slice(0, 19)
-          .replace("T", " ");
-
-        connection.query(
-          query,
-          [
-            RatingModel.postId,
-            RatingModel.userId,
-            RatingModel.stars,
-            formattedDateTimeNow,
-          ],
-          (error, results) => {
-            if (error) {
-              response.success = false;
-              response.message = `Error querying the database: ${error}`;
-
-              reject(response);
-            } else {
-              response.status = 200;
-              response.success = true;
-
-              resolve(response);
-            }
+    try {
+      // Check for existing rating
+      const checkQuery = `SELECT id FROM Rating WHERE userId = ? AND postId = ?`;
+      connection.query(
+        checkQuery,
+        [RatingModel.userId, RatingModel.postId],
+        async (checkError, checkResults) => {
+          if (checkError) {
+            response.success = false;
+            response.status = 500;
+            response.message = `Error checking existing rating: ${checkError.message}`;
+            return reject(response);
           }
-        );
-      } else {
-        response.message = `No user was found for this user id: ${RatingModel.userId}!`;
-        response.status = 409;
-        response.success = false;
 
-        reject(response);
-      }
-    } else {
-      response.message = `No post was found for this post id: ${RatingModel.postId}!`;
-      response.status = 409;
+          if (checkResults.length > 0) {
+            // Update existing rating
+            const updateQuery = `UPDATE Rating SET stars = ?, createdAt = ? WHERE id = ?`;
+            const dateTimeNow = new Date().toISOString().slice(0, 19).replace("T", " ");
+            connection.query(
+              updateQuery,
+              [RatingModel.stars, dateTimeNow, checkResults[0].id],
+              (updateError, updateResults) => {
+                if (updateError) {
+                  response.success = false;
+                  response.status = 500;
+                  response.message = `Error updating rating: ${updateError.message}`;
+                  return reject(response);
+                }
+                response.status = 200;
+                response.success = true;
+                response.message = "Rating updated successfully";
+                response.data = { id: checkResults[0].id };
+                resolve(response);
+              }
+            );
+          } else {
+            // Insert new rating
+            const insertQuery = `INSERT INTO Rating (userId, postId, createdAt, stars) VALUES (?, ?, ?, ?)`;
+            const dateTimeNow = new Date().toISOString().slice(0, 19).replace("T", " ");
+            connection.query(
+              insertQuery,
+              [RatingModel.userId, RatingModel.postId, dateTimeNow, RatingModel.stars],
+              (insertError, insertResults) => {
+                if (insertError) {
+                  response.success = false;
+                  response.status = 500;
+                  response.message = `Error creating rating: ${insertError.message}`;
+                  return reject(response);
+                }
+                response.status = 201;
+                response.success = true;
+                response.message = "Rating created successfully";
+                response.data = { id: insertResults.insertId };
+                resolve(response);
+              }
+            );
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Service - Error:', error.stack);
       response.success = false;
-
+      response.status = error.status || 500;
+      response.message = error.message || "Internal server error";
       reject(response);
-    }
-  }).catch((error) => {
-    if (error instanceof ResponseModel) {
-      return error;
-    } else {
-      const response = new ResponseModel();
-      response.message = error;
-      response.success = false;
-      return response;
     }
   });
 };
@@ -183,8 +179,6 @@ const createRating = (RatingModel) => {
 const updateRating = (rating) => {
   return new Promise((resolve, reject) => {
     const response = new ResponseModel();
-    console.log("This is the response: ", response);
-    
     // Ensure the rating object has the id
     if (!rating.id) {
       response.success = false;
@@ -193,8 +187,6 @@ const updateRating = (rating) => {
     }
     
     const query = "UPDATE Rating SET stars = ? WHERE id = ?";
-    console.log("Rating stars: ", rating.stars);
-    console.log("Rating ID: ", rating.id);
 
     connection.query(query, [rating.stars, rating.id], (error, results) => {
       if (error) {
@@ -230,7 +222,6 @@ const getRatingByPostAndUser = (postId, userId) => {
       } else {
         if (results.length > 0) {
           const rating = results[0]; 
-          console.log("Rating fetched: ", rating);  // Check if 'id' is in the result
           response.status = 200;
           response.success = true;
           response.data = rating; // Pass the full rating object

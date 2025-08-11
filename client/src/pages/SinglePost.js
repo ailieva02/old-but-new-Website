@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import PostInfo from "../components/PostInfo";
 import CommentsSection from "../components/CommentsSection";
 import "../styles/SinglePost.css";
+import { useAuth } from "../components/AuthContext";
 
 const getImage = (imageName) => {
   try {
@@ -16,10 +17,14 @@ const getImage = (imageName) => {
 function SinglePost() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [ratings, setRatings] = useState([]);
+  const { getUserData } = useAuth();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [averageRating, setAverageRating] = useState(0);
+
+  const { userId: currentUserId, userRole: currentUserRole } = getUserData();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -46,7 +51,7 @@ function SinglePost() {
           throw new Error("Failed to fetch the average rating");
         }
         const data = await response.json();
-        setAverageRating(data.data[0].average_stars || 0);
+        setAverageRating(data.data.average_stars || 0);
       } catch (error) {
         console.error(`Error fetching average rating: ${error.message}`);
       }
@@ -63,7 +68,10 @@ function SinglePost() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ 
+          id,
+        currentUserId: currentUserId,
+      currentUserRole: currentUserRole }),
       });
 
       if (!response.ok) {
@@ -89,13 +97,12 @@ function SinglePost() {
   }
 
   return (
-    <div className="single-post">
+  <div className="single-post">
       <PostInfo
         post={post}
         onEdit={handleEdit}
         onDelete={handleDelete}
         getImage={getImage}
-        averageRating={averageRating}
       />
       <CommentsSection postId={id} postUserId={post.userId} />
     </div>

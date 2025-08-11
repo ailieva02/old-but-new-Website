@@ -1,157 +1,185 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StarRating from "../components/StarRating.js";
+import { useAuth } from "../components/AuthContext";
 import "../styles/PostInfo.css";
 
-function PostInfo({ post, onEdit, onDelete, getImage }) {
+function PostInfo({ post, onEdit, onDelete, getImage, averageRating }) {
+  const navigate = useNavigate();
+  const id = post.id;
   const [username, setUsername] = useState("");
+  const [canEditOrDelete, setCanEditOrDelete] = useState(false);
   const [categoryName, setCategoryName] = useState("");
-  const [averageRating, setAverageRating] = useState(null);
   const [ratings, setRatings] = useState([]);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [userRating, setUserRating] = useState(null);
+  const { getUserData } = useAuth();
+  const [averageFromInfoRating, setAverageFromInfoRating] = useState(0);
+  const [users, setUsers] = useState([]);
 
   const imageUrl = post.image ? getImage(post.image) : null;
-  const userId = sessionStorage.getItem("userId");
 
-  const fetchAdditionalData = async () => {
+  const { userId: currentUserId, userRole: currentUserRole } = getUserData();
+
+  const fetchUsers = async () => {
     try {
-      const [userResponse, categoryResponse, ratingsResponse] =
-        await Promise.all([
-          fetch(`${process.env.REACT_APP_API}/api/users/${post.userId}`),
-          fetch(`${process.env.REACT_APP_API}/api/categories/${post.categoryId}`),
-          fetch(
-            `${process.env.REACT_APP_API}/api/ratings-by-post-id?postId=${post.id}`
-          ),
-        ]);
+      const response = await fetch(
+        `${process.env.REACT_APP_API}/api/users?currentUserId=${currentUserId}&currentUserRole=${currentUserRole}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (result.success && Array.isArray(result.data)) {
+        const user = result.data.find((u) => u.id === post.userId);
+        if (user) {
+          setUsername(user.username || "Unknown user");
+        } else {
+          console.error(`User with ID ${post.userId} not found`);
+          setUsername("Unknown user");
+        }
+        setUsers(result.data); // Store all users if needed elsewhere
+      } else {
+        console.error("Unexpected users data format:", result);
+        setUsername("Unknown user");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setError(`Failed to fetch users: ${error.message}`);
+      setUsername("Unknown user");
+    }
+  };
 
-      if (!userResponse.ok || !categoryResponse.ok || !ratingsResponse.ok) {
-        throw new Error("Failed to fetch data");
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API}/api/categories/${post.categoryId}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const [userData, categoryData, ratingsData] = await Promise.all([
-        userResponse.json(),
-        categoryResponse.json(),
-        ratingsResponse.json(),
-      ]);
+      const result = await response.json();
+      if (result.success && result.data) {
+        setCategoryName(result.data[0].title || "Unknown category");
+      } else {
+        console.error("Unexpected category data format:", result);
+        setCategoryName("Unknown category");
+      }
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      setError(`Failed to fetch category: ${error.message}`);
+      setCategoryName("Unknown category");
+    }
+  };
 
-      setUsername(
-        userData.success && Array.isArray(userData.data)
-          ? userData.data[0].username
-          : "Unknown user"
+  const fetchRatings = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API}/api/ratings-by-post-id?postId=${post.id}`
       );
-
-      setCategoryName(
-        categoryData.success && Array.isArray(categoryData.data)
-          ? categoryData.data[0].title
-          : "Unknown category"
-      );
-
-      if (ratingsData.success) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (result.success && Array.isArray(result.data)) {
         const ratingsWithUsernames = await Promise.all(
-          ratingsData.data.map(async (rating) => {
+          result.data.map(async (rating) => {
             const userResponse = await fetch(
-              `${process.env.REACT_APP_API}/api/users/${rating.userId}`
+              `${process.env.REACT_APP_API}/api/users/${rating.userId}?currentUserId=${currentUserId}&currentUserRole=${currentUserRole}`
             );
             const userData = await userResponse.json();
             return {
               ...rating,
               username:
-                userData.success && Array.isArray(userData.data)
-                  ? userData.data[0].username
+                userData.success && userData.data
+                  ? userData.data.username || "Unknown user"
                   : "Unknown user",
             };
           })
         );
-
         setRatings(ratingsWithUsernames);
         calculateAverageRating(ratingsWithUsernames);
-
         const foundRating = ratingsWithUsernames.find(
-          (rating) => rating.userId === parseInt(userId)
+          (rating) => rating.userId === parseInt(currentUserId)
         );
         setUserRating(foundRating ? foundRating.stars : null);
       } else {
+        console.error("Unexpected ratings data format:", result);
         setRatings([]);
-        setAverageRating("No ratings yet");
       }
     } catch (error) {
-      setError(`Failed to fetch additional data: ${error.message}`);
+      console.error("Error fetching ratings:", error);
+      setError(`Failed to fetch ratings: ${error.message}`);
+      setRatings([]);
+    }
+  };
+
+  const fetchAverageRating = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API}/api/ratings-average-by-post-id?postId=${id}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setAverageFromInfoRating(data.data.average_stars || 0);
+    } catch (error) {
+      console.error(`Error fetching average rating: ${error.message}`);
+      setError(`Failed to fetch average rating: ${error.message}`);
     }
   };
 
   const calculateAverageRating = (ratings) => {
     if (ratings.length === 0) {
-      setAverageRating("No ratings yet");
+      setAverageFromInfoRating(0);
       return;
     }
     const total = ratings.reduce((acc, rating) => acc + rating.stars, 0);
-    setAverageRating((total / ratings.length).toFixed(1));
+    setAverageFromInfoRating(total / ratings.length);
   };
 
   const handleRatingSubmit = async (stars) => {
     try {
-      const userId = parseInt(sessionStorage.getItem("userId"));
-      const endpoint = userRating !== null ? "update" : "create";
-      const method = endpoint === "update" ? "PUT" : "POST";
       const body = JSON.stringify({
         postId: post.id,
-        userId: userId,
+        userId: parseInt(currentUserId),
         stars,
+        currentUserId: parseInt(currentUserId),
       });
 
       const response = await fetch(
-        `${process.env.REACT_APP_API}/api/ratings/${endpoint}`,
+        `${process.env.REACT_APP_API}/api/ratings/create`,
         {
-          method,
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body,
         }
       );
-
       if (!response.ok) {
-        throw new Error("Failed to submit rating");
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      fetchAdditionalData();  // Refresh ratings and average
-      setSuccessMessage("Rating submitted successfully!");
+      fetchAverageRating();
+      fetchRatings();
+      navigate(`/post/${post.id}`);
     } catch (error) {
       setError(`Failed to submit rating: ${error.message}`);
-    }
-  };
-
-  const deleteRating = async (ratingId) => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API}/api/ratings/delete`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ratingId: ratingId }), // Sending ratingId in the request body
-        }
-      );
-  
-      if (!response.ok) {
-        throw new Error("Failed to delete rating");
-      }
-  
-      // Remove the deleted rating from the list and update the state
-      const updatedRatings = ratings.filter((rating) => rating.id !== ratingId);
-      setRatings(updatedRatings);
-  
-      // Recalculate average after deleting
-      calculateAverageRating(updatedRatings); // Pass the updated ratings directly
-  
-      setSuccessMessage("Rating deleted successfully!");
-    } catch (error) {
-      setError(`Failed to delete rating: ${error.message}`);
+      console.error("Error submitting rating:", error);
     }
   };
 
   useEffect(() => {
-    fetchAdditionalData();
+
+      setCanEditOrDelete(
+      parseInt(currentUserId) === post.userId || currentUserRole === "admin"
+    );
+
+    fetchUsers();
+    fetchCategory();
+    fetchRatings();
+    fetchAverageRating();
   }, [post.id, post.userId, post.categoryId]);
 
   return (
@@ -161,39 +189,20 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
       {imageUrl && (
         <img src={imageUrl} alt={post.title} className="post-image" />
       )}
-      <button className="edit-button" onClick={onEdit}>
-        Edit
-      </button>
-      <button className="delete-button" onClick={onDelete}>
-        Delete
-      </button>
+       {canEditOrDelete && (
+        <>
+          <button className="edit-button" onClick={onEdit}>
+            Edit
+          </button>
+          <button className="delete-button" onClick={onDelete}>
+            Delete
+          </button>
+        </>
+      )}
       <p className="post-body">{post.body}</p>
       <p className="post-author">Posted by: {username}</p>
-      <p className="post-rating">Average Rating: {averageRating}</p>
+      <p className="post-rating">Average Rating: {averageFromInfoRating}</p>
       <div className="post-actions"></div>
-      {error && <p className="error-message">Error: {error}</p>}
-      {successMessage && <p className="success-message">{successMessage}</p>}
-
-      <div className="ratings-section">
-        <h2>Ratings:</h2>
-        {ratings.length > 0 ? (
-          <ul className="ratings-list">
-            {ratings.map((rating) => (
-              <li key={rating.id} className="rating-item">
-                Rating: {rating.stars} by {rating.username}
-                <button
-                  className="delete-rating-button"
-                  onClick={() => deleteRating(rating.id)}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No ratings yet</p>
-        )}
-      </div>
 
       <div className="rating-form">
         <h2>Rate this post:</h2>
@@ -203,6 +212,8 @@ function PostInfo({ post, onEdit, onDelete, getImage }) {
           userRating={userRating}
         />
       </div>
+      {error && <p className="error-message">{error}</p>}
+      {successMessage && <p className="success-message">{successMessage}</p>}
     </div>
   );
 }

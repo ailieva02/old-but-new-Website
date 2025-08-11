@@ -4,12 +4,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #76c7c0; /* Medium Aquamarine */
-  color: #fff; /* White */
+  background-color: #76c7c0;
+  /* Medium Aquamarine */
+  color: #fff;
+  /* White */
 }
 
 .logo {
-  height: 50px;
+  height: 50px
 }
 
 .nav-links {
@@ -25,7 +27,8 @@
 
 .nav-links a {
   text-decoration: none;
-  color: #fff; /* White */
+  color: #fff;
+  /* White */
   font-size: 16px;
 }
 

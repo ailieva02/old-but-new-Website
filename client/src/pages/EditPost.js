@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/AddEditPost.css";
+import { useAuth } from "../components/AuthContext";
 
 function EditPost() {
   const { id } = useParams();
   const [title, setTitle] = useState("");
+  const [userId, setUserId] = useState("");
   const [body, setBody] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
+  const { getUserData } = useAuth();
+
+  const { userId: currentUserId, userRole: currentUserRole } = getUserData();
 
   useEffect(() => {
     // Fetch categories for the dropdown
@@ -35,6 +40,7 @@ function EditPost() {
         const result = await response.json();
         const post = result.data[0];
         setTitle(post.title);
+        setUserId(post.userId);
         setBody(post.body);
         setCategory(post.categoryId);
       } catch (error) {
@@ -54,7 +60,9 @@ function EditPost() {
       categoryId: category,
       title: title,
       body: body,
-      userId: sessionStorage.getItem("userId"),
+      userId: userId,
+      currentUserId: currentUserId,
+      currentUserRole: currentUserRole,
     };
   
     try {

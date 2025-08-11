@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/NavBar.css";
 import { useAuth } from "./AuthContext";
+import logo from "../assets/logo.png";
+import logo2 from "../assets/logo2.png";
 
 function NavBar() {
   const [username, setUsername] = useState("Loading...");
@@ -51,7 +53,7 @@ function NavBar() {
     <nav className="navbar">
       <Link to="/" className="logo-link">
         <img
-          src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjl1MHcxM25jZXl3aWhkcnhyaWJoNHBnZzl0OXFqMnZia2hwZXY0biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l49JZ1oF2qHawdmzm/giphy.webp"
+          src={logo2}
           alt="Logo"
           className="logo"
         />

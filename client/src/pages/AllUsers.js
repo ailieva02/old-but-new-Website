@@ -96,6 +96,10 @@ function AllUsers() {
     }
   };
 
+  const canEditOrDelete = (userId) => {
+    return currentUserRole === "admin" || parseInt(currentUserId) === userId;
+  };
+
   return (
     <div>
       <h1>All Users</h1>
@@ -120,18 +124,22 @@ function AllUsers() {
                 <td>{user.email}</td>
                 <td>{user.role}</td>
                 <td>
-                  <button
-                    className="edit-button"
-                    onClick={() => handleEdit(user)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(user.id)}
-                  >
-                    Delete
-                  </button>
+                  {canEditOrDelete(user.id) && (
+                    <>
+                      <button
+                        className="edit-button"
+                        onClick={() => handleEdit(user)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

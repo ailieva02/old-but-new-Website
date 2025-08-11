@@ -95,6 +95,21 @@ const createPost = (postModel, currentUserId, currentUserRole) => {
 const updatePost = (PostModel) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
+    console.log("Thi sis the Post Mode: ", PostModel);
+     // Authorization check
+    if (!PostModel.currentUserId || !PostModel.currentUserRole) {
+      response.success = false;
+      response.status = 400;
+      response.message = 'Current user data is required';
+      return reject(response);
+    }
+
+    if (PostModel.currentUserRole !== 'admin' && parseInt(PostModel.currentUserId) !== parseInt(PostModel.userId)) {
+      response.success = false;
+      response.status = 403;
+      response.message = 'Unauthorized: You can only update your own account';
+      return reject(response);
+    }
 
     // Validate the new category
     const categoryCheck = await categoryService.getCategoryById(PostModel.categoryId);
@@ -160,40 +175,73 @@ if (!PostModel.id || !PostModel.categoryId || !PostModel.userId) {
 };
 
 
-
-
-const deletePostById = (id) => {
+const deletePostById = (id, currentUserId, currentUserRole) => {
   return new Promise(async (resolve, reject) => {
     const response = new ResponseModel();
 
-    const query = `DELETE FROM Post 
-                       WHERE id = ?`;
+    try {
+      // First, fetch the post to check ownership
+      const selectQuery = `SELECT userId FROM Post WHERE id = ?`;
+      connection.query(selectQuery, [id], (error, results) => {
+        if (error) {
+          console.error("Error querying the database:", error);
+          response.success = false;
+          response.status = 500;
+          response.message = `Error querying the database: ${error.message}`;
+          return reject(response);
+        }
 
-    connection.query(query, [id], (error, results) => {
-      if (error) {
-        console.log(error);
-        response.success = false;
-        response.message = `Error querying the database: ${error}`;
+        if (results.length === 0) {
+          response.success = false;
+          response.status = 404;
+          response.message = "Post not found";
+          return reject(response);
+        }
 
-        reject(response);
-      } else {
-        response.status = 200;
-        response.success = true;
+        const post = results[0];
 
-        resolve(response);
-      }
-    });
-  }).catch((error) => {
-    if (error instanceof ResponseModel) {
-      return error;
-    } else {
-      const response = new ResponseModel();
-      response.message = error;
+        // Check if the user is the owner or an admin
+        if (post.userId !== currentUserId && currentUserRole !== "admin") {
+          response.success = false;
+          response.status = 403;
+          response.message = "Unauthorized: You can only delete your own posts or if you are an admin";
+          return reject(response);
+        }
+
+        // Proceed with deletion if authorized
+        const deleteQuery = `DELETE FROM Post WHERE id = ?`;
+        connection.query(deleteQuery, [id], (deleteError, deleteResults) => {
+          if (deleteError) {
+            console.error("Error deleting post:", deleteError);
+            response.success = false;
+            response.status = 500;
+            response.message = `Error deleting post: ${deleteError.message}`;
+            return reject(response);
+          }
+
+          if (deleteResults.affectedRows === 0) {
+            response.success = false;
+            response.status = 404;
+            response.message = "Post not found or already deleted";
+            return reject(response);
+          }
+
+          response.status = 200;
+          response.success = true;
+          response.message = "Post deleted successfully";
+          resolve(response);
+        });
+      });
+    } catch (error) {
+      console.error("Unexpected error in deletePostById:", error);
       response.success = false;
-      return response;
+      response.status = 500;
+      response.message = `Unexpected error: ${error.message}`;
+      reject(response);
     }
   });
 };
+
 
 const deleteAllPosts = () => {
   return new Promise(async (resolve, reject) => {

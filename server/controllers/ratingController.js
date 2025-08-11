@@ -7,6 +7,7 @@ const createRating = async (req, res) => {
   newRating.postId = req.body.postId;
   newRating.userId = req.body.userId;
   newRating.stars = parseInt(req.body.stars);
+  newRating.currentUserId = req.body.currentUserId;
 
   const result = await ratingService.createRating(newRating);
   if (result) {
@@ -67,7 +68,6 @@ const getAllRatingsByPostId = async (req, res) => {
   const postId = parseInt(req.query.postId);
   try {
     const result = await ratingService.getAllRatingsByPostId(postId);
-
     if (result.success) {
       res.status(result.status).json(result);
     } else {
@@ -91,9 +91,8 @@ const getRatingById = async (req, res) => {
 };
 
 const getAverageRatingForPostId = async (req, res) => {
-  const postId = parseInt(req.body.id);
+  const postId = parseInt(req.query.postId);
   const result = await ratingService.getAverageRatingForPostId(postId);
-
   if (result) {
     res.status(result.status).json(result);
   } else {
